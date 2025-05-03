@@ -120,4 +120,18 @@ export default class Snake {
 			ctx.restore();
 		});
 	}
+
+	addPiece () {
+		const last = this.body[this.body.length - 1];
+		const secondLast = this.body[this.body.length - 2] || last;
+
+		const direction = Vector.sub(last.position, secondLast.position).normalize();
+
+		const offset = direction.copy().mult(last.size);
+		const newPos = Vector.sub(last.position, offset);
+
+		const newPiece = new SnakeBodyPiece(newPos.x, newPos.y, last.size);
+		last.child = newPiece;
+		this.body.push(newPiece);
+	}
 }
