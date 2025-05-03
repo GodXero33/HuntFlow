@@ -1,5 +1,12 @@
+import Snake from "./snake.js";
+import SnakeMap from "./snake.map.js";
+
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
+const snake = new Snake();
+const snakeMap = new SnakeMap(snake);
+
+console.log(snakeMap);
 
 let width, height;
 
@@ -12,9 +19,15 @@ let deltaTime = 0;
 function draw () {
 	ctx.fillStyle = '#000000';
 	ctx.fillRect(0, 0, width, height);
+
+	ctx.save();
+	snakeMap.draw(ctx);
+	ctx.restore();
 }
 
-function update () {}
+function update () {
+	snakeMap.update(deltaTime);
+}
 
 function animate () {
 	const now = performance.now();
@@ -56,5 +69,28 @@ play();
 window.addEventListener('resize', resize);
 
 window.addEventListener('keyup', event => {
-	if (event.code === 'Space') isPlaying ? pause() : play();
+	const code = event.code;
+
+	if (event.code === 'Space') {
+		isPlaying ? pause() : play();
+		return;
+	}
+
+	if (code === 'KeyA') {
+		snake.turnLeft = false;
+		return;
+	}
+
+	if (code === 'KeyD') snake.turnRight = false;
+});
+
+window.addEventListener('keydown', event => {
+	const code = event.code;
+
+	if (code === 'KeyA') {
+		snake.turnLeft = true;
+		return;
+	}
+
+	if (code === 'KeyD') snake.turnRight = true;
 });
