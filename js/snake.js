@@ -5,12 +5,15 @@ class SnakeBodyPiece {
 		this.position = new Vector(x, y);
 		this.size = size;
 		this.color = '#ff0000';
+		this.child = null;
+		this.rotation = 0;
 	}
 }
 
 export default class Snake {
 	constructor () {
 		this.head = new SnakeBodyPiece(300, 300, 20);
+		this.body = new Array(5);
 
 		this.speed = 0.1;
 		this.turnSpeed = 0.002;
@@ -22,6 +25,17 @@ export default class Snake {
 		this.wobbleAngle = 0;
 		this.wobbleAmplitude = Math.PI / 8;
 		this.wobblePhase = 0;
+
+		this.#generateSnakeBody();
+	}
+
+	#generateSnakeBody () {
+		this.body[0] = this.head;
+
+		for (let a = 1; a < 5; a++) {
+			this.body[a] = new SnakeBodyPiece(300 + a * 20, 300, 20);
+			this.body[a - 1].child = this.body[a];
+		}
 	}
 
 	updateMovement (dt) {
@@ -41,16 +55,18 @@ export default class Snake {
 
 	update (dt) {
 		this.updateMovement(dt);
+		this.head.rotation = -(this.headingAngle + this.wobbleAngle);
 	}
 
 	draw (ctx) {
-		const head = this.head;
-		ctx.fillStyle = head.color;
+		this.body.forEach(piece => {
+			ctx.fillStyle = piece.color;
 
-		ctx.save();
-		ctx.translate(head.position.x, head.position.y);
-		ctx.rotate(-(this.headingAngle + this.wobbleAngle));
-		ctx.fillRect(-head.size * 0.5, -head.size * 0.5, head.size, head.size);
-		ctx.restore();
+			ctx.save();
+			ctx.translate(piece.position.x, piece.position.y);
+			ctx.rotate(piece.rotation);
+			ctx.fillRect(-piece.size * 0.5, -piece.size * 0.5, piece.size, piece.size);
+			ctx.restore();
+		});
 	}
 }
