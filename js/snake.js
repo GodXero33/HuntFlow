@@ -11,16 +11,16 @@ class SnakeBodyPiece {
 }
 
 export default class Snake {
-	static maxBend = Math.PI / 3;
+	static maxBend = Math.PI / 6;
 
 	constructor () {
-		const size = 20;
+		const size = 5;
 
-		this.head = new SnakeBodyPiece(300, 300, 20);
-		this.body = new Array(size);
+		this.head = null;
+		this.body = null;
 
-		this.speed = 0.2;
-		this.turnSpeed = 0.004;
+		this.speed = 0.1;
+		this.turnSpeed = 0.002;
 		this.headingAngle = -Math.PI / 2;
 
 		this.turnLeft = false;
@@ -34,10 +34,20 @@ export default class Snake {
 	}
 
 	#generateSnakeBody (size) {
+		if (size <= 4) return;
+
+		const headSize = 22;
+		const neckSize = 15;
+		const pieceSize = 15;
+		const tailSize = 10;
+
+		this.head = new SnakeBodyPiece(300, 300, headSize);
+		this.body = new Array(size);
+
 		this.body[0] = this.head;
 
 		for (let a = 1; a < size; a++) {
-			this.body[a] = new SnakeBodyPiece(300 + a * 20, 300, 20);
+			this.body[a] = new SnakeBodyPiece(300 + a * 20, 300, a == 1 ? neckSize : a == size - 1 ? tailSize : pieceSize);
 			this.body[a - 1].child = this.body[a];
 		}
 	}
@@ -109,17 +119,46 @@ export default class Snake {
 		this.head.rotation = -(this.headingAngle + this.wobbleAngle);
 	}
 
-	draw (ctx) {
-		this.body.forEach(piece => {
-			ctx.fillStyle = piece.color;
+	draw(ctx) {
+		ctx.linejoin = 'round';
 
-			ctx.save();
-			ctx.translate(piece.position.x, piece.position.y);
-			ctx.rotate(piece.rotation);
-			ctx.fillRect(-piece.size * 0.5, -piece.size * 0.5, piece.size, piece.size);
-			ctx.restore();
-		});
-	}
+		const leftPoints = [];
+		const rightPoints = [];
+
+		for (const piece of this.body) {
+			const angle = piece.rotation + Math.PI / 2;
+			const dx = Math.cos(angle) * piece.size * 0.5;
+			const dy = Math.sin(angle) * piece.size * 0.5;
+
+			leftPoints.push({ x: piece.position.x + dx, y: piece.position.y + dy });
+			rightPoints.push({ x: piece.position.x - dx, y: piece.position.y - dy });
+		}
+
+		ctx.fillStyle = this.body[0].color;
+
+		ctx.beginPath();
+
+		const head = this.body[0];
+		const headAngle = head.rotation;
+		const radius = head.size * 0.5;
+
+		ctx.arc(head.position.x, head.position.y, radius, headAngle, headAngle + Math.PI, false);
+
+		for (let i = 1; i < leftPoints.length; i++)
+			ctx.lineTo(leftPoints[i].x, leftPoints[i].y);
+
+		const tail = this.body.at(-1);
+		const tailAngle = tail.rotation;
+
+		ctx.arc(tail.position.x, tail.position.y, tail.size * 0.5, tailAngle + Math.PI / 2, tailAngle - Math.PI / 2, false);
+
+		for (let i = rightPoints.length - 2; i > 0; i--)
+			ctx.lineTo(rightPoints[i].x, rightPoints[i].y);
+
+		ctx.closePath();
+		ctx.fill();
+}
+
 
 	addPiece () {
 		const last = this.body[this.body.length - 1];
