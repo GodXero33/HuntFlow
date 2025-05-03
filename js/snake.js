@@ -11,13 +11,17 @@ class SnakeBodyPiece {
 }
 
 export default class Snake {
-	constructor () {
-		this.head = new SnakeBodyPiece(300, 300, 20);
-		this.body = new Array(5);
+	static maxBend = Math.PI / 3;
 
-		this.speed = 0.1;
-		this.turnSpeed = 0.002;
-		this.headingAngle = 0;
+	constructor () {
+		const size = 20;
+
+		this.head = new SnakeBodyPiece(300, 300, 20);
+		this.body = new Array(size);
+
+		this.speed = 0.2;
+		this.turnSpeed = 0.004;
+		this.headingAngle = -Math.PI / 2;
 
 		this.turnLeft = false;
 		this.turnRight = false;
@@ -26,13 +30,13 @@ export default class Snake {
 		this.wobbleAmplitude = Math.PI / 8;
 		this.wobblePhase = 0;
 
-		this.#generateSnakeBody();
+		this.#generateSnakeBody(size);
 	}
 
-	#generateSnakeBody () {
+	#generateSnakeBody (size) {
 		this.body[0] = this.head;
 
-		for (let a = 1; a < 5; a++) {
+		for (let a = 1; a < size; a++) {
 			this.body[a] = new SnakeBodyPiece(300 + a * 20, 300, 20);
 			this.body[a - 1].child = this.body[a];
 		}
@@ -51,6 +55,53 @@ export default class Snake {
 
 		this.head.position.x += Math.sin(this.headingAngle + this.wobbleAngle) * this.speed  * dt;
 		this.head.position.y += Math.cos(this.headingAngle + this.wobbleAngle) * this.speed  * dt;
+
+		for (let i = 1; i < this.body.length; i++) {
+			const parent = this.body[i - 1];
+			const child = this.body[i];
+
+			const dir = Vector.sub(parent.position, child.position);
+			const distance = dir.mag();
+			const targetDist = parent.size;
+
+			if (distance > targetDist) {
+				dir.normalize();
+				dir.mult(distance - targetDist);
+				child.position.add(dir);
+			}
+
+			// Calculate rotation of piece
+			const angleDiff = Vector.sub(parent.position, child.position).heading() - child.rotation;
+
+			child.rotation += Math.atan2(Math.sin(angleDiff), Math.cos(angleDiff));
+		}
+
+		// Angle constraint between two pieces
+		for (let i = 1; i < this.body.length - 1; i++) {
+			const parent = this.body[i - 1];
+			const current = this.body[i];
+			const child = this.body[i + 1];
+
+			const vecA = Vector.sub(current.position, parent.position);
+			const vecB = Vector.sub(child.position, current.position);
+
+			const angleA = Math.atan2(vecA.y, vecA.x);
+			const angleB = Math.atan2(vecB.y, vecB.x);
+
+			let delta = angleB - angleA;
+
+			while (delta > Math.PI) delta -= Math.PI * 2;
+			while (delta < -Math.PI) delta += Math.PI * 2;
+
+			if (Math.abs(delta) > Snake.maxBend) {
+				const sign = Math.sign(delta);
+				const clampedAngle = angleA + sign * Snake.maxBend;
+
+				const distance = Vector.sub(child.position, current.position).mag();
+				child.position.x = current.position.x + Math.cos(clampedAngle) * distance;
+				child.position.y = current.position.y + Math.sin(clampedAngle) * distance;
+			}
+		}
 	}
 
 	update (dt) {
