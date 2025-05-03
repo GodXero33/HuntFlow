@@ -25,7 +25,7 @@ export default class Snake {
 	}
 
 	updateMovement (dt) {
-		if (!this.turnLeft && !this.turnRight) {
+		if (this.turnLeft == this.turnRight) {
 			this.wobbleAngle = Math.sin(this.wobblePhase) * this.wobbleAmplitude + this.wobbleAmplitude;
 			this.wobblePhase = (this.wobblePhase + 0.1) % (Math.PI * 2);
 		}
