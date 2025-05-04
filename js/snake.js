@@ -1,4 +1,4 @@
-import { getIntersectionOfTwoLines } from "./util.js";
+import { angleDifference, getIntersectionOfTwoLines } from "./util.js";
 import Vector from "./vector.js";
 
 class SnakeBodyPiece {
@@ -14,59 +14,62 @@ export default class Snake {
 	static maxBend = Math.PI / 6;
 
 	constructor () {
-		const size = 10;
-
 		this.head = null;
 		this.body = null;
 
 		this.camera = null;
 		this.cameraUpdateDistance = 100;
 		this.isCameraUpdating = false;
+		this.tracker = new Vector(-100, 100);
 
-		this.speed = 0.1;
-		this.turnSpeed = 0.004;
+		this.speed = 1.5;
+		this.turnSpeed = 0.08;
 		this.headingAngle = -Math.PI / 2;
-
-		this.turnLeft = false;
-		this.turnRight = false;
 
 		this.wobbleAngle = 0;
 		this.wobbleAmplitude = Math.PI / 8;
 		this.wobblePhase = 0;
 
+		this.mouse = new Vector();
+		this.mousedown = false;
+
+		this.canvasDimensions = new Vector();
+
 		this.color = '#ff0000';
 
-		this.#generateSnakeBody(size);
+		this.debug = true;
+
+		this.#generateSnakeBody(50, 0, 0);
 	}
 
-	#generateSnakeBody (size) {
+	#generateSnakeBody (size, x, y) {
 		if (size <= 4) return;
 
-		this.head = new SnakeBodyPiece(300, 300, 5);
+		this.head = new SnakeBodyPiece(x, y, 5);
 		this.body = new Array(size);
 		this.camera = new Vector(this.head.position.x, this.head.position.y);
 
 		this.body[0] = this.head;
 
 		for (let a = 1; a < size; a++) {
-			this.body[a] = new SnakeBodyPiece(300, 300, 5);
+			this.body[a] = new SnakeBodyPiece(x, y, 5);
 			this.body[a - 1].child = this.body[a];
 		}
 	}
 
-	updateMovement (dt) {
+	updateMovement () {
 		this.wobbleAngle = Math.sin(this.wobblePhase) * this.wobbleAmplitude + this.wobbleAmplitude;
 		this.wobblePhase = (this.wobblePhase + 0.2) % (Math.PI * 2);
 
-		if (this.turnLeft) this.headingAngle += this.turnSpeed * dt;
-		if (this.turnRight) this.headingAngle -= this.turnSpeed * dt;
+		const targetAngle = Math.atan2(this.tracker.y - this.head.position.y, this.tracker.x - this.head.position.x);
+		let deltaAngle = angleDifference(targetAngle, this.headingAngle);
 
-		this.headingAngle %= Math.PI * 2;
+		this.headingAngle += deltaAngle * 0.05;
 
 		let prevPosition = this.head.position.copy();
 
-		this.head.position.x += Math.sin(this.headingAngle + this.wobbleAngle) * this.speed  * dt;
-		this.head.position.y += Math.cos(this.headingAngle + this.wobbleAngle) * this.speed  * dt;
+		this.head.position.x += Math.cos(this.headingAngle + this.wobbleAngle) * this.speed;
+		this.head.position.y += Math.sin(this.headingAngle + this.wobbleAngle) * this.speed;
 
 		for (let i = 1; i < this.body.length; i++) {
 			const child = this.body[i];
@@ -87,21 +90,23 @@ export default class Snake {
 		this.head.rotation = -(this.headingAngle + this.wobbleAngle);
 	}
 
-	updateCamera (dt) {
-		const distance = Vector.dist(this.camera, this.head.position);
+	updateCamera () {
+		this.camera.x += (this.head.position.x - this.camera.x) * this.speed * 0.01;
+		this.camera.y += (this.head.position.y - this.camera.y) * this.speed * 0.01;
 
-		if (distance > this.cameraUpdateDistance && !this.isCameraUpdating) this.isCameraUpdating = true;
-		if (distance < 1) this.isCameraUpdating = false;
-
-		if (!this.isCameraUpdating) return;
-
-		this.camera.x += (this.head.position.x - this.camera.x) * this.speed * dt * 0.01;
-		this.camera.y += (this.head.position.y - this.camera.y) * this.speed * dt * 0.01;
+		
 	}
 
-	update (dt, map) {
-		this.updateMovement(dt);
-		this.updateCamera(dt);
+	updateTracker () {
+		this.tracker.x = this.mouse.x - this.canvasDimensions.x * 0.5 + this.camera.x;
+		this.tracker.y = this.mouse.y - this.canvasDimensions.y * 0.5 + this.camera.y;
+	}
+
+	update (map) {
+		this.updateMovement();
+		this.updateCamera();
+
+		if (this.mousedown) this.updateTracker();
 	}
 
 	draw(ctx) {
@@ -142,6 +147,18 @@ export default class Snake {
 
 		ctx.closePath();
 		ctx.fill();
+
+		if (this.debug) {
+			ctx.fillStyle = '#f00';
+			ctx.strokeStyle = '#ffffff';
+
+			ctx.fillRect(this.tracker.x - 10, this.tracker.y - 10, 20, 20);
+
+			ctx.beginPath();
+			ctx.moveTo(this.head.position.x, this.head.position.y);
+			ctx.lineTo(this.head.position.x + Math.cos(this.headingAngle + this.wobbleAngle) * 50, this.head.position.y + Math.sin(this.headingAngle + this.wobbleAngle) * 50);
+			ctx.stroke();
+		}
 	}
 
 	addPiece () {

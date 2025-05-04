@@ -21,11 +21,11 @@ function draw () {
 	ctx.fillStyle = '#000000';
 	ctx.fillRect(0, 0, width, height);
 
-	snakeMap.draw(ctx, width, height);
+	snakeMap.draw(ctx);
 }
 
 function update () {
-	snakeMap.update(deltaTime);
+	snakeMap.update();
 }
 
 function animate () {
@@ -61,6 +61,12 @@ function resize () {
 	canvas.width = width;
 	canvas.height = height;
 
+	snake.canvasDimensions.x = width;
+	snake.canvasDimensions.y = height;
+
+	snakeMap.canvasDimensions.x = width;
+	snakeMap.canvasDimensions.y = height;
+
 	draw();
 }
 
@@ -70,30 +76,10 @@ play();
 window.addEventListener('resize', resize);
 
 window.addEventListener('keyup', event => {
-	const code = event.code;
-
 	if (event.code === 'Space') {
 		isPlaying ? pause() : play();
 		return;
 	}
-
-	if (code === 'KeyA') {
-		snake.turnLeft = false;
-		return;
-	}
-
-	if (code === 'KeyD') snake.turnRight = false;
-});
-
-window.addEventListener('keydown', event => {
-	const code = event.code;
-
-	if (code === 'KeyA') {
-		snake.turnLeft = true;
-		return;
-	}
-
-	if (code === 'KeyD') snake.turnRight = true;
 });
 
 window.addEventListener('blur', () => {
@@ -111,4 +97,22 @@ window.addEventListener('focus', () => {
 	}
 
 	pauseOnBlur = false;
+});
+
+window.addEventListener('mousedown', event => {
+	snake.mouse.x = event.x;
+	snake.mouse.y = event.y;
+
+	snake.mousedown = true;
+});
+
+window.addEventListener('mousemove', event => {
+	if (snake.mousedown) {
+		snake.mouse.x = event.x;
+		snake.mouse.y = event.y;
+	}
+});
+
+window.addEventListener('mouseup', () => {
+	snake.mousedown = false;
 });

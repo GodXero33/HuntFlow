@@ -44,8 +44,18 @@ function getIntersectionOfTwoLines (x1, y1, x2, y2, x3, y3, x4, y4, returnAnyway
 	return undefined;
 }
 
+function angleDifference (a, b) {
+	let diff = a - b;
+
+	while (diff > Math.PI) diff -= Math.PI * 2;
+	while (diff < -Math.PI) diff += Math.PI * 2;
+
+	return diff;
+}
+
 export {
 	getIntersectionOfTwoLines,
 	lerp,
-	inverseLerp
+	inverseLerp,
+	angleDifference
 };
