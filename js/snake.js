@@ -20,7 +20,6 @@ export default class Snake {
 		this.body = null;
 
 		this.camera = null;
-		this.cameraUpdateCounter = 0;
 		this.cameraUpdateDistance = 100;
 		this.isCameraUpdating = false;
 

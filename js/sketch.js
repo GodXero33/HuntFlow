@@ -40,6 +40,8 @@ function animate () {
 }
 
 function play () {
+	if (pauseOnBlur) return;
+
 	prevTime = performance.now();
 	deltaTime = 0;
 	isPlaying = true;
@@ -97,9 +99,16 @@ window.addEventListener('keydown', event => {
 window.addEventListener('blur', () => {
 	pauseOnBlur = true;
 
-	pause();
+	cancelAnimationFrame(nextAnimationFrame);
 });
 
 window.addEventListener('focus', () => {
-	if (pauseOnBlur) play();
+	if (pauseOnBlur && isPlaying) {
+		prevTime = performance.now();
+		deltaTime = 0;
+
+		animate();
+	}
+
+	pauseOnBlur = false;
 });
