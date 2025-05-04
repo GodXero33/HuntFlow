@@ -38,8 +38,16 @@ export default class Vector {
 		return this;
 	}
 
+	dot (v) {
+		return this.x * v.x + this.y * v.y;
+	}
+
 	mag () {
 		return Math.sqrt(this.x * this.x + this.y * this.y);
+	}
+
+	magSq () {
+		return this.x * this.x + this.y * this.y;
 	}
 
 	normalize () {
@@ -67,5 +75,13 @@ export default class Vector {
 
 	heading () {
 		return Math.atan2(this.y, this.x);
+	}
+
+	projectOntoLine (a, b) {
+		const ap = Vector.sub(this, a);
+		const ab = Vector.sub(b, a).normalize();
+		const d = ap.dot(ab);
+
+		return new Vector(a.x + ab.x * d, a.y + ab.y * d);
 	}
 }

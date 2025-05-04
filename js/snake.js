@@ -1,10 +1,10 @@
+import { getIntersectionOfTwoLines } from "./util.js";
 import Vector from "./vector.js";
 
 class SnakeBodyPiece {
 	constructor (x, y, size) {
 		this.position = new Vector(x, y);
 		this.size = size;
-		this.color = '#ff0000';
 		this.child = null;
 		this.rotation = 0;
 	}
@@ -14,13 +14,13 @@ export default class Snake {
 	static maxBend = Math.PI / 6;
 
 	constructor () {
-		const size = 5;
+		const size = 150;
 
 		this.head = null;
 		this.body = null;
 
 		this.speed = 0.1;
-		this.turnSpeed = 0.002;
+		this.turnSpeed = 0.004;
 		this.headingAngle = -Math.PI / 2;
 
 		this.turnLeft = false;
@@ -30,91 +30,57 @@ export default class Snake {
 		this.wobbleAmplitude = Math.PI / 8;
 		this.wobblePhase = 0;
 
+		this.color = '#ff0000';
+
 		this.#generateSnakeBody(size);
 	}
 
 	#generateSnakeBody (size) {
 		if (size <= 4) return;
 
-		const headSize = 22;
-		const neckSize = 15;
-		const pieceSize = 15;
-		const tailSize = 10;
-
-		this.head = new SnakeBodyPiece(300, 300, headSize);
+		this.head = new SnakeBodyPiece(300, 300, 5);
 		this.body = new Array(size);
 
 		this.body[0] = this.head;
 
 		for (let a = 1; a < size; a++) {
-			this.body[a] = new SnakeBodyPiece(300 + a * 20, 300, a == 1 ? neckSize : a == size - 1 ? tailSize : pieceSize);
+			this.body[a] = new SnakeBodyPiece(300, 300, 5);
 			this.body[a - 1].child = this.body[a];
 		}
 	}
 
 	updateMovement (dt) {
-		if (this.turnLeft == this.turnRight) {
-			this.wobbleAngle = Math.sin(this.wobblePhase) * this.wobbleAmplitude + this.wobbleAmplitude;
-			this.wobblePhase = (this.wobblePhase + 0.1) % (Math.PI * 2);
-		}
+		this.wobbleAngle = Math.sin(this.wobblePhase) * this.wobbleAmplitude + this.wobbleAmplitude;
+		this.wobblePhase = (this.wobblePhase + 0.2) % (Math.PI * 2);
 
 		if (this.turnLeft) this.headingAngle += this.turnSpeed * dt;
 		if (this.turnRight) this.headingAngle -= this.turnSpeed * dt;
 
 		this.headingAngle %= Math.PI * 2;
 
+		let prevPosition = this.head.position.copy();
+
 		this.head.position.x += Math.sin(this.headingAngle + this.wobbleAngle) * this.speed  * dt;
 		this.head.position.y += Math.cos(this.headingAngle + this.wobbleAngle) * this.speed  * dt;
 
 		for (let i = 1; i < this.body.length; i++) {
-			const parent = this.body[i - 1];
 			const child = this.body[i];
+			const childPosition = child.position.copy();
+			
+			child.position.x = prevPosition.x;
+			child.position.y = prevPosition.y;
 
-			const dir = Vector.sub(parent.position, child.position);
-			const distance = dir.mag();
-			const targetDist = parent.size;
-
-			if (distance > targetDist) {
-				dir.normalize();
-				dir.mult(distance - targetDist);
-				child.position.add(dir);
-			}
+			prevPosition = childPosition;
 
 			// Calculate rotation of piece
+			const parent = this.body[i - 1];
 			const angleDiff = Vector.sub(parent.position, child.position).heading() - child.rotation;
 
 			child.rotation += Math.atan2(Math.sin(angleDiff), Math.cos(angleDiff));
 		}
-
-		// Angle constraint between two pieces
-		for (let i = 1; i < this.body.length - 1; i++) {
-			const parent = this.body[i - 1];
-			const current = this.body[i];
-			const child = this.body[i + 1];
-
-			const vecA = Vector.sub(current.position, parent.position);
-			const vecB = Vector.sub(child.position, current.position);
-
-			const angleA = Math.atan2(vecA.y, vecA.x);
-			const angleB = Math.atan2(vecB.y, vecB.x);
-
-			let delta = angleB - angleA;
-
-			while (delta > Math.PI) delta -= Math.PI * 2;
-			while (delta < -Math.PI) delta += Math.PI * 2;
-
-			if (Math.abs(delta) > Snake.maxBend) {
-				const sign = Math.sign(delta);
-				const clampedAngle = angleA + sign * Snake.maxBend;
-
-				const distance = Vector.sub(child.position, current.position).mag();
-				child.position.x = current.position.x + Math.cos(clampedAngle) * distance;
-				child.position.y = current.position.y + Math.sin(clampedAngle) * distance;
-			}
-		}
 	}
 
-	update (dt) {
+	update (dt, map) {
 		this.updateMovement(dt);
 		this.head.rotation = -(this.headingAngle + this.wobbleAngle);
 	}
@@ -134,7 +100,7 @@ export default class Snake {
 			rightPoints.push({ x: piece.position.x - dx, y: piece.position.y - dy });
 		}
 
-		ctx.fillStyle = this.body[0].color;
+		ctx.fillStyle = this.color;
 
 		ctx.beginPath();
 
@@ -157,8 +123,7 @@ export default class Snake {
 
 		ctx.closePath();
 		ctx.fill();
-}
-
+	}
 
 	addPiece () {
 		const last = this.body[this.body.length - 1];
