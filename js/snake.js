@@ -34,6 +34,7 @@ export default class Snake {
 		this.canvasDimensions = new Vector();
 
 		this.color = '#994476';
+		this.isIntersectedWithBound = false;
 
 		this.debug = false;
 
@@ -100,11 +101,32 @@ export default class Snake {
 		this.tracker.y = this.mouse.y - this.canvasDimensions.y * 0.5 + this.camera.y;
 	}
 
-	update (map) {
+	checkCollision (bounds) {
+		this.isIntersectedWithBound = bounds.find(bound => {
+			for (let a = 0; a < bound.length - 2; a += 2) {
+				const intersection = getIntersectionOfTwoLines(
+					this.body[0].position.x,
+					this.body[0].position.y,
+					this.body[1].position.x,
+					this.body[1].position.y,
+					bound[a],
+					bound[a + 1],
+					bound[a + 2],
+					bound[a + 3]
+				);
+
+				return intersection !== undefined;
+			}
+		}) !== undefined;
+	}
+
+	update (bounds) {
 		this.updateMovement();
 		this.updateCamera();
 
 		if (this.mousedown) this.updateTracker();
+
+		this.checkCollision(bounds);
 	}
 
 	draw(ctx) {

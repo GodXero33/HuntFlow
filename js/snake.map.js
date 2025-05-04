@@ -7,10 +7,12 @@ export default class SnakeMap {
 			[200, 200, 200, 300]
 		];
 		this.canvasDimensions = new Vector();
+		this.isGameOver = false;
 	}
 
 	update () {
-		this.snake.update(this.map);
+		if (!this.isGameOver) this.snake.update(this.map);
+		if (this.snake.isIntersectedWithBound) this.isGameOver = true;
 	}
 
 	draw (ctx) {
