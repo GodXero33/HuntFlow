@@ -10,7 +10,9 @@ export default class SnakeMap {
 		this.snake.update(dt, this.map);
 	}
 
-	draw (ctx) {
+	draw (ctx, width, height) {
+		ctx.save();
+		ctx.translate(width * 0.5 - this.snake.camera.x, height * 0.5 - this.snake.camera.y);
 		this.snake.draw(ctx);
 
 		ctx.strokeStyle = '#ffffff';
@@ -26,5 +28,7 @@ export default class SnakeMap {
 
 			ctx.stroke();
 		});
+
+		ctx.restore();
 	}
 }

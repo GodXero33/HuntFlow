@@ -12,6 +12,7 @@ let width, height;
 
 let isPlaying = false;
 let nextAnimationFrame = null;
+let pauseOnBlur = false;
 
 let prevTime = 0;
 let deltaTime = 0;
@@ -20,9 +21,7 @@ function draw () {
 	ctx.fillStyle = '#000000';
 	ctx.fillRect(0, 0, width, height);
 
-	ctx.save();
-	snakeMap.draw(ctx);
-	ctx.restore();
+	snakeMap.draw(ctx, width, height);
 }
 
 function update () {
@@ -93,4 +92,14 @@ window.addEventListener('keydown', event => {
 	}
 
 	if (code === 'KeyD') snake.turnRight = true;
+});
+
+window.addEventListener('blur', () => {
+	pauseOnBlur = true;
+
+	pause();
+});
+
+window.addEventListener('focus', () => {
+	if (pauseOnBlur) play();
 });

@@ -14,10 +14,15 @@ export default class Snake {
 	static maxBend = Math.PI / 6;
 
 	constructor () {
-		const size = 150;
+		const size = 10;
 
 		this.head = null;
 		this.body = null;
+
+		this.camera = null;
+		this.cameraUpdateCounter = 0;
+		this.cameraUpdateDistance = 100;
+		this.isCameraUpdating = false;
 
 		this.speed = 0.1;
 		this.turnSpeed = 0.004;
@@ -40,6 +45,7 @@ export default class Snake {
 
 		this.head = new SnakeBodyPiece(300, 300, 5);
 		this.body = new Array(size);
+		this.camera = new Vector(this.head.position.x, this.head.position.y);
 
 		this.body[0] = this.head;
 
@@ -78,11 +84,25 @@ export default class Snake {
 
 			child.rotation += Math.atan2(Math.sin(angleDiff), Math.cos(angleDiff));
 		}
+
+		this.head.rotation = -(this.headingAngle + this.wobbleAngle);
+	}
+
+	updateCamera (dt) {
+		const distance = Vector.dist(this.camera, this.head.position);
+
+		if (distance > this.cameraUpdateDistance && !this.isCameraUpdating) this.isCameraUpdating = true;
+		if (distance < 1) this.isCameraUpdating = false;
+
+		if (!this.isCameraUpdating) return;
+
+		this.camera.x += (this.head.position.x - this.camera.x) * this.speed * dt * 0.01;
+		this.camera.y += (this.head.position.y - this.camera.y) * this.speed * dt * 0.01;
 	}
 
 	update (dt, map) {
 		this.updateMovement(dt);
-		this.head.rotation = -(this.headingAngle + this.wobbleAngle);
+		this.updateCamera(dt);
 	}
 
 	draw(ctx) {
