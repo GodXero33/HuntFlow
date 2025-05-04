@@ -11,8 +11,6 @@ class SnakeBodyPiece {
 }
 
 export default class Snake {
-	static maxBend = Math.PI / 6;
-
 	constructor () {
 		this.head = null;
 		this.body = null;
@@ -35,9 +33,9 @@ export default class Snake {
 
 		this.canvasDimensions = new Vector();
 
-		this.color = '#ff0000';
+		this.color = '#994476';
 
-		this.debug = true;
+		this.debug = false;
 
 		this.#generateSnakeBody(50, 0, 0);
 	}
