@@ -74,8 +74,6 @@ export default class Snake {
 		this.head.position.x += Math.cos(this.headingAngle + this.wobbleAngle) * this.speed;
 		this.head.position.y += Math.sin(this.headingAngle + this.wobbleAngle) * this.speed;
 
-		const distanceToTracker = Vector.dist(this.tracker, this.head.position);
-
 		if (this.sensorEnabled) {
 			if (this.sensor.turnLeftFact !== 0) this.headingAngle += this.sensor.turnLeftFact * 0.5;
 			if (this.sensor.turnRightFact !== 0) this.headingAngle += this.sensor.turnRightFact * 0.5;
