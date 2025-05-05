@@ -1,13 +1,18 @@
 import { getIntersectionOfTwoLines } from "./util.js";
 
 export default class SnakeSensor {
-	constructor (snake) {
+	constructor (snake, count = 6) {
+		count = count % 2 == 0 ? count : count + 1;
+
 		this.snake = snake;
 
 		this.spread = Math.PI / 2;
-		this.count = 5;
-		this.range = 200;
+		this.count = count;
+		this.range = 50;
 		this.rays = Array.from({ length: this.count }, () => ({ x1: 0, y1: 0, x2: 0, y2: 0, u: 1 }));
+
+		this.turnLeftFact = 0;
+		this.turnRightFact = 0;
 	}
 
 	draw (ctx) {
@@ -26,7 +31,7 @@ export default class SnakeSensor {
 		ctx.globalAlpha = 1;
 	}
 
-	checkIntersection (bounds, ray) {
+	checkRayIntersection (bounds, ray) {
 		const x1 = ray.x1;
 		const y1 = ray.y1;
 		const x2 = ray.x2;
@@ -64,6 +69,10 @@ export default class SnakeSensor {
 		const snakeHeadPositionY = snakeHead.position.y;
 		const snakeHeadRotation = snakeHead.rotation;
 
+		let turnLeftFact = 0;
+		let turnRightFact = 0;
+		const halfCount = Math.floor(this.count / 2);
+
 		for (let a = 0; a < this.count; a++) {
 			const angle = startAngle + deltaAngle * a - snakeHeadRotation;
 			const x = Math.cos(angle) * this.range + snakeHeadPositionX;
@@ -77,8 +86,19 @@ export default class SnakeSensor {
 			ray.y2 = y;
 			ray.u = 1;
 
-			this.checkIntersection(bounds, ray);
+			this.checkRayIntersection(bounds, ray);
+
+			if (a <= halfCount - 1) {
+				turnLeftFact += ray.u;
+			} else {
+				turnRightFact += ray.u;
+			}
 		}
 
+		turnLeftFact = 1 - (turnLeftFact / halfCount) ** 2;
+		turnRightFact = 1 - (turnRightFact / halfCount) ** 2;
+
+		this.turnLeftFact = turnLeftFact;
+		this.turnRightFact = turnRightFact;
 	}
 }

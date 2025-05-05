@@ -33,7 +33,11 @@ export default class Snake {
 		this.mousedown = false;
 
 		this.canvasDimensions = new Vector();
-		this.sensor = new SnakeSensor(this);
+		this.distanceToTracker = 0;
+
+		this.sensor = new SnakeSensor(this, 10);
+		this.sensorEnabled = false;
+		this.sensorEnableDistance = 200;
 
 		this.color = '#994476';
 		this.isIntersectedWithBound = false;
@@ -70,6 +74,13 @@ export default class Snake {
 		this.head.position.x += Math.cos(this.headingAngle + this.wobbleAngle) * this.speed;
 		this.head.position.y += Math.sin(this.headingAngle + this.wobbleAngle) * this.speed;
 
+		const distanceToTracker = Vector.dist(this.tracker, this.head.position);
+
+		if (this.sensorEnabled) {
+			if (this.sensor.turnLeftFact !== 0) this.headingAngle += this.sensor.turnLeftFact * 0.5;
+			if (this.sensor.turnRightFact !== 0) this.headingAngle += this.sensor.turnRightFact * 0.5;
+		}
+
 		for (let i = 1; i < this.body.length; i++) {
 			const child = this.body[i];
 			const childPosition = child.position.copy();
@@ -92,8 +103,6 @@ export default class Snake {
 	updateCamera () {
 		this.camera.x += (this.head.position.x - this.camera.x) * this.speed * 0.01;
 		this.camera.y += (this.head.position.y - this.camera.y) * this.speed * 0.01;
-
-		
 	}
 
 	updateTracker () {
@@ -116,8 +125,10 @@ export default class Snake {
 	}
 
 	update (bounds) {
-		this.sensor.update(bounds);
-		// update movement according to Sensor data
+		this.distanceToTracker = Vector.dist(this.tracker, this.head.position);
+		this.sensorEnabled = this.distanceToTracker > this.sensorEnableDistance;
+
+		if (this.sensorEnabled) this.sensor.update(bounds);
 
 		this.updateMovement();
 		this.updateCamera();
@@ -170,7 +181,7 @@ export default class Snake {
 			ctx.fillStyle = '#f00';
 
 			ctx.fillRect(this.tracker.x - 10, this.tracker.y - 10, 20, 20);
-			this.sensor.draw(ctx);
+			if (this.sensorEnabled) this.sensor.draw(ctx);
 		}
 	}
 
