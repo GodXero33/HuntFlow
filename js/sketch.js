@@ -84,6 +84,10 @@ window.addEventListener('keyup', event => {
 		isPlaying ? pause() : play();
 		return;
 	}
+
+	if (event.code === 'KeyD') {
+		snake.debug = !snake.debug;
+	}
 });
 
 window.addEventListener('blur', () => {

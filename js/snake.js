@@ -1,3 +1,4 @@
+import SnakeSensor from "./snake.sensor.js";
 import { angleDifference, getIntersectionOfTwoLines } from "./util.js";
 import Vector from "./vector.js";
 
@@ -32,6 +33,7 @@ export default class Snake {
 		this.mousedown = false;
 
 		this.canvasDimensions = new Vector();
+		this.sensor = new SnakeSensor();
 
 		this.color = '#994476';
 		this.isIntersectedWithBound = false;
@@ -57,6 +59,9 @@ export default class Snake {
 	}
 
 	updateMovement () {
+		this.sensor.update();
+		// update movement according to Sensor data
+
 		this.wobbleAngle = Math.sin(this.wobblePhase) * this.wobbleAmplitude + this.wobbleAmplitude;
 		this.wobblePhase = (this.wobblePhase + 0.2) % (Math.PI * 2);
 
@@ -102,22 +107,17 @@ export default class Snake {
 	}
 
 	checkCollision (bounds) {
-		this.isIntersectedWithBound = bounds.find(bound => {
-			for (let a = 0; a < bound.length - 2; a += 2) {
-				const intersection = getIntersectionOfTwoLines(
-					this.body[0].position.x,
-					this.body[0].position.y,
-					this.body[1].position.x,
-					this.body[1].position.y,
-					bound[a],
-					bound[a + 1],
-					bound[a + 2],
-					bound[a + 3]
-				);
+		const x1 = this.body[0].position.x;
+		const y1 = this.body[0].position.y;
+		const x2 = this.body[1].position.x;
+		const y2 = this.body[1].position.y;
 
-				return intersection !== undefined;
-			}
-		}) !== undefined;
+		this.isIntersectedWithBound = bounds.findIndex(bound => {
+			for (let a = 0; a < bound.length - 2; a += 2)
+				if (getIntersectionOfTwoLines(x1, y1, x2, y2, bound[a], bound[a + 1], bound[a + 2], bound[a + 3])) return true;
+
+			return false;
+		}) !== -1;
 	}
 
 	update (bounds) {
@@ -178,6 +178,8 @@ export default class Snake {
 			ctx.moveTo(this.head.position.x, this.head.position.y);
 			ctx.lineTo(this.head.position.x + Math.cos(this.headingAngle + this.wobbleAngle) * 50, this.head.position.y + Math.sin(this.headingAngle + this.wobbleAngle) * 50);
 			ctx.stroke();
+
+			this.sensor.draw(ctx);
 		}
 	}
 
