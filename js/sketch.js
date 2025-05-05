@@ -17,6 +17,8 @@ let pauseOnBlur = false;
 let prevTime = 0;
 let deltaTime = 0;
 
+let localData;
+
 function draw () {
 	ctx.fillStyle = '#000000';
 	ctx.fillRect(0, 0, width, height);
@@ -70,8 +72,10 @@ function resize () {
 	draw();
 }
 
-resize();
-play();
+function init () {
+	resize();
+	play();
+}
 
 window.addEventListener('resize', resize);
 
@@ -115,4 +119,42 @@ window.addEventListener('mousemove', event => {
 
 window.addEventListener('mouseup', () => {
 	snake.mousedown = false;
+});
+
+function loadLocalData () {
+	const localDataString = localStorage.getItem('ultra-snake-2d');
+	
+	if (localDataString == null) {
+		localData = {
+			mapIndex: 1
+		};
+	} else {
+		localData = JSON.parse(localDataString);
+	}
+
+	localStorage.setItem('ultra-snake-2d', JSON.stringify(localData));
+}
+
+async function loadMap (mapIndex) {
+	return new Promise((resolve, reject) => {
+		fetch(`maps/${mapIndex.toString().padStart(5, '0')}.json`).then(response => {
+			if (!response) throw new Error('Failed to fetch map data');
+
+			return response.json();
+		}).then(mapData => resolve(mapData)).catch(error => reject(error));
+	});
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+	try {
+		loadLocalData();
+
+		const mapData = await loadMap(localData.mapIndex);
+		console.log(mapData);
+		snakeMap.map = mapData;
+
+		init();
+	} catch (error) {
+		console.error('Failed to start game: ', error);
+	}
 });

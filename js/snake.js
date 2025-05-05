@@ -18,7 +18,7 @@ export default class Snake {
 		this.camera = null;
 		this.cameraUpdateDistance = 100;
 		this.isCameraUpdating = false;
-		this.tracker = new Vector(-100, 100);
+		this.tracker = new Vector(0, 0);
 
 		this.speed = 1.5;
 		this.turnSpeed = 0.08;

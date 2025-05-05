@@ -11,7 +11,7 @@ export default class SnakeMap {
 	}
 
 	update () {
-		if (!this.isGameOver) this.snake.update(this.map);
+		if (!this.isGameOver) this.snake.update(this.map.bounds);
 		if (this.snake.isIntersectedWithBound) this.isGameOver = true;
 	}
 
@@ -23,7 +23,7 @@ export default class SnakeMap {
 		ctx.strokeStyle = '#ffffff';
 		ctx.lineWidth = 2;
 
-		this.map.forEach(bound => {
+		this.map.bounds.forEach(bound => {
 			ctx.beginPath();
 			ctx.moveTo(bound[0], bound[1]);
 
