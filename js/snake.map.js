@@ -3,15 +3,19 @@ import Vector from "./vector.js";
 export default class SnakeMap {
 	constructor (snake) {
 		this.snake = snake;
-		this.map = [
-			[200, 200, 200, 300]
-		];
+		this.map = null;
+		this.bounds = null;
 		this.canvasDimensions = new Vector();
 		this.isGameOver = false;
 	}
 
+	setMap (map) {
+		this.map = map;
+		this.bounds = map.objects.map(object => object.bounds);
+	}
+
 	update () {
-		if (!this.isGameOver) this.snake.update(this.map.bounds);
+		if (!this.isGameOver) this.snake.update(this.bounds);
 		if (this.snake.isIntersectedWithBound) this.isGameOver = true;
 	}
 
@@ -23,7 +27,7 @@ export default class SnakeMap {
 		ctx.strokeStyle = '#ffffff';
 		ctx.lineWidth = 2;
 
-		this.map.bounds.forEach(bound => {
+		this.bounds.forEach(bound => {
 			ctx.beginPath();
 			ctx.moveTo(bound[0], bound[1]);
 

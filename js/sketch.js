@@ -150,9 +150,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 		loadLocalData();
 
 		const mapData = await loadMap(localData.mapIndex);
-		console.log(mapData);
-		snakeMap.map = mapData;
 
+		console.log(mapData);
+		snakeMap.setMap(mapData);
 		init();
 	} catch (error) {
 		console.error('Failed to start game: ', error);
