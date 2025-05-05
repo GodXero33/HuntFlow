@@ -57,9 +57,6 @@ export default class Snake {
 	}
 
 	updateMovement () {
-		this.sensor.update();
-		// update movement according to Sensor data
-
 		this.wobbleAngle = Math.sin(this.wobblePhase) * this.wobbleAmplitude + this.wobbleAmplitude;
 		this.wobblePhase = (this.wobblePhase + 0.2) % (Math.PI * 2);
 
@@ -119,6 +116,9 @@ export default class Snake {
 	}
 
 	update (bounds) {
+		this.sensor.update(bounds);
+		// update movement according to Sensor data
+
 		this.updateMovement();
 		this.updateCamera();
 
