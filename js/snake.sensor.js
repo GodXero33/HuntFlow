@@ -1,14 +1,14 @@
 import { getIntersectionOfTwoLines } from "./util.js";
 
 export default class SnakeSensor {
-	constructor (snake, count = 6) {
+	constructor (snake, count, range) {
 		count = count % 2 == 0 ? count : count + 1;
 
 		this.snake = snake;
 
 		this.spread = Math.PI / 2;
 		this.count = count;
-		this.range = 50;
+		this.range = range;
 		this.rays = Array.from({ length: this.count }, () => ({ x1: 0, y1: 0, x2: 0, y2: 0, u: 1 }));
 
 		this.turnLeftFact = 0;

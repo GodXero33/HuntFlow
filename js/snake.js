@@ -26,7 +26,7 @@ export default class Snake {
 		this.headingAngle = -Math.PI / 2;
 
 		this.wobbleAngle = 0;
-		this.wobbleAmplitude = Math.PI / 8;
+		this.wobbleAmplitude = Math.PI / 16;
 		this.wobblePhase = 0;
 
 		this.mouse = new Vector();
@@ -35,7 +35,7 @@ export default class Snake {
 		this.canvasDimensions = new Vector();
 		this.distanceToTracker = 0;
 
-		this.sensor = new SnakeSensor(this, 10);
+		this.sensor = new SnakeSensor(this, 10, Math.floor(this.speed * 20));
 		this.sensorEnabled = false;
 		this.sensorEnableDistance = 200;
 
@@ -75,8 +75,8 @@ export default class Snake {
 		this.head.position.y += Math.sin(this.headingAngle + this.wobbleAngle) * this.speed;
 
 		if (this.sensorEnabled) {
-			if (this.sensor.turnLeftFact !== 0) this.headingAngle += this.sensor.turnLeftFact * 0.5;
-			if (this.sensor.turnRightFact !== 0) this.headingAngle += this.sensor.turnRightFact * 0.5;
+			if (this.sensor.turnLeftFact > 0.5) this.headingAngle += this.sensor.turnLeftFact * 0.5;
+			if (this.sensor.turnRightFact > 0.5) this.headingAngle += this.sensor.turnRightFact * 0.5;
 		}
 
 		for (let i = 1; i < this.body.length; i++) {
