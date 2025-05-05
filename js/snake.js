@@ -33,12 +33,10 @@ export default class Snake {
 		this.mousedown = false;
 
 		this.canvasDimensions = new Vector();
-		this.sensor = new SnakeSensor();
+		this.sensor = new SnakeSensor(this);
 
 		this.color = '#994476';
 		this.isIntersectedWithBound = false;
-
-		this.debug = false;
 
 		this.#generateSnakeBody(50, 0, 0);
 	}
@@ -168,17 +166,10 @@ export default class Snake {
 		ctx.closePath();
 		ctx.fill();
 
-		if (this.debug) {
+		if (window['UltraSnake2D_in_debug']) {
 			ctx.fillStyle = '#f00';
-			ctx.strokeStyle = '#ffffff';
 
 			ctx.fillRect(this.tracker.x - 10, this.tracker.y - 10, 20, 20);
-
-			ctx.beginPath();
-			ctx.moveTo(this.head.position.x, this.head.position.y);
-			ctx.lineTo(this.head.position.x + Math.cos(this.headingAngle + this.wobbleAngle) * 50, this.head.position.y + Math.sin(this.headingAngle + this.wobbleAngle) * 50);
-			ctx.stroke();
-
 			this.sensor.draw(ctx);
 		}
 	}

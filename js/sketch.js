@@ -86,7 +86,7 @@ window.addEventListener('keyup', event => {
 	}
 
 	if (event.code === 'KeyD') {
-		snake.debug = !snake.debug;
+		window['UltraSnake2D_in_debug'] = !window['UltraSnake2D_in_debug'];
 	}
 });
 
@@ -162,3 +162,5 @@ window.addEventListener('DOMContentLoaded', async () => {
 		console.error('Failed to start game: ', error);
 	}
 });
+
+window['UltraSnake2D_in_debug'] = true;
