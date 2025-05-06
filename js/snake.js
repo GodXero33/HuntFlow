@@ -28,14 +28,19 @@ export default class Snake {
 		this.wobbleAngle = 0;
 		this.wobbleAmplitude = Math.PI / 16;
 		this.wobblePhase = 0;
+		this.wobbleSpeed = 0.2;
 
 		this.mouse = new Vector();
 		this.mousedown = false;
 
 		this.canvasDimensions = new Vector();
-		this.distanceToTracker = 0;
 
-		this.sensor = new SnakeSensor(this, 10, Math.floor(this.speed * 20));
+		this.distanceToTracker = 0;
+		this.steeringFact = 0.05;
+		this.sensorTurnTriggerThreshold = 0.5;
+		this.sensorTriggerSteeringFact = 0.5;
+
+		this.sensor = new SnakeSensor(this, 10, Math.floor(this.speed * 50));
 		this.sensorEnabled = false;
 		this.sensorEnableDistance = 200;
 
@@ -62,12 +67,12 @@ export default class Snake {
 
 	updateMovement () {
 		this.wobbleAngle = Math.sin(this.wobblePhase) * this.wobbleAmplitude + this.wobbleAmplitude;
-		this.wobblePhase = (this.wobblePhase + 0.2) % (Math.PI * 2);
+		this.wobblePhase = (this.wobblePhase + this.wobbleSpeed) % (Math.PI * 2);
 
 		const targetAngle = Math.atan2(this.tracker.y - this.head.position.y, this.tracker.x - this.head.position.x);
 		let deltaAngle = angleDifference(targetAngle, this.headingAngle);
 
-		this.headingAngle += deltaAngle * 0.05;
+		this.headingAngle += deltaAngle * this.steeringFact;
 
 		let prevPosition = this.head.position.copy();
 
@@ -75,8 +80,8 @@ export default class Snake {
 		this.head.position.y += Math.sin(this.headingAngle + this.wobbleAngle) * this.speed;
 
 		if (this.sensorEnabled) {
-			if (this.sensor.turnLeftFact > 0.5) this.headingAngle += this.sensor.turnLeftFact * 0.5;
-			if (this.sensor.turnRightFact > 0.5) this.headingAngle += this.sensor.turnRightFact * 0.5;
+			if (Math.abs(this.sensor.turnLeftFact) > this.sensorTurnTriggerThreshold) this.headingAngle += this.sensor.turnLeftFact * this.sensorTriggerSteeringFact;
+			if (Math.abs(this.sensor.turnRightFact) > this.sensorTurnTriggerThreshold) this.headingAngle -= this.sensor.turnRightFact * this.sensorTriggerSteeringFact;
 		}
 
 		for (let i = 1; i < this.body.length; i++) {
