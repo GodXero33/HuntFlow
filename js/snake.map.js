@@ -1,12 +1,18 @@
+import { isTwoRectangleIntersecting } from "./util.js";
 import Vector from "./vector.js";
 
 export default class SnakeMap {
 	constructor (snake) {
 		this.snake = snake;
 		this.map = null;
-		this.bounds = null;
+
 		this.canvasDimensions = new Vector();
 		this.isGameOver = false;
+
+		this.screenObjects = [];
+		this.screenObjectsFilterOffset = 200;
+
+		this.cameraRect = { x: 0, y: 0, w: 0, h: 0 };
 	}
 
 	setMap (map) {
@@ -18,8 +24,35 @@ export default class SnakeMap {
 	}
 
 	update () {
-		if (!this.isGameOver) this.snake.update(this.bounds);
+		this.cameraRect.x = this.snake.camera.x - this.canvasDimensions.x * 0.5 + this.screenObjectsFilterOffset * 0.5;
+		this.cameraRect.y = this.snake.camera.y - this.canvasDimensions.y * 0.5 + this.screenObjectsFilterOffset * 0.5;
+		this.cameraRect.w = this.canvasDimensions.x - this.screenObjectsFilterOffset;
+		this.cameraRect.h = this.canvasDimensions.y - this.screenObjectsFilterOffset;
+
+		this.screenObjects = this.map.objects.filter(object => object.boundingRect && isTwoRectangleIntersecting(object.boundingRect, this.cameraRect));
+
+		if (!this.isGameOver) this.snake.update(this.screenObjects.map(object => object.bounds));
 		if (this.snake.isIntersectedWithBound) this.isGameOver = true;
+	}
+
+	drawDebug (ctx) {
+		// draw bounding rects
+		ctx.strokeStyle = '#f00';
+		ctx.setLineDash([5, 10]);
+
+		this.screenObjects.forEach(object => {
+			if (!object.boundingRect) return;
+
+			ctx.strokeRect(object.boundingRect.x, object.boundingRect.y, object.boundingRect.w, object.boundingRect.h);
+		});
+
+		ctx.setLineDash([]);
+
+		// draw camera
+		const offset = this.screenObjectsFilterOffset / 2;
+
+		ctx.strokeStyle = '#0f0';
+		ctx.strokeRect(this.cameraRect.x, this.cameraRect.y, this.cameraRect.w, this.cameraRect.h);
 	}
 
 	draw (ctx) {
@@ -30,7 +63,9 @@ export default class SnakeMap {
 		ctx.strokeStyle = '#ffffff';
 		ctx.lineWidth = 2;
 
-		this.bounds.forEach(bound => {
+		this.screenObjects.forEach(object => {
+			const bound = object.bounds;
+
 			ctx.beginPath();
 			ctx.moveTo(bound[0], bound[1]);
 
@@ -40,14 +75,7 @@ export default class SnakeMap {
 			ctx.stroke();
 		});
 
-		if (window['UltraSnake2D_in_debug']) {
-			this.map.objects.forEach(object => {
-				if (!object.boundingRect) return;
-
-				ctx.strokeStyle = '#f00';
-				ctx.strokeRect(...object.boundingRect);
-			});
-		}
+		if (window['UltraSnake2D_in_debug']) this.drawDebug(ctx);
 
 		ctx.restore();
 	}
@@ -69,6 +97,6 @@ export default class SnakeMap {
 			if (maxY < y) maxY = y;
 		}
 
-		return [minX, minY, maxX - minX, maxY - minY];
+		return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
 	}
 }
