@@ -77,6 +77,14 @@ function init () {
 	play();
 }
 
+function updateDebugModeVariables () {
+	if (window['UltraSnake2D_in_debug']) {
+		snakeMap.screenObjectsFilterOffset = 100;
+	} else {
+		snakeMap.screenObjectsFilterOffset = -200;
+	}
+}
+
 window.addEventListener('resize', resize);
 
 window.addEventListener('keyup', event => {
@@ -87,6 +95,7 @@ window.addEventListener('keyup', event => {
 
 	if (event.code === 'KeyD') {
 		window['UltraSnake2D_in_debug'] = !window['UltraSnake2D_in_debug'];
+		updateDebugModeVariables();
 	}
 });
 

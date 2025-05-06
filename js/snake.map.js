@@ -24,6 +24,7 @@ export default class SnakeMap {
 	}
 
 	update () {
+		// Update camera rect
 		this.cameraRect.x = this.snake.camera.x - this.canvasDimensions.x * 0.5 + this.screenObjectsFilterOffset * 0.5;
 		this.cameraRect.y = this.snake.camera.y - this.canvasDimensions.y * 0.5 + this.screenObjectsFilterOffset * 0.5;
 		this.cameraRect.w = this.canvasDimensions.x - this.screenObjectsFilterOffset;
