@@ -87,7 +87,7 @@ export default class Snake {
 		for (let i = 1; i < this.body.length; i++) {
 			const child = this.body[i];
 			const childPosition = child.position.copy();
-			
+
 			child.position.x = prevPosition.x;
 			child.position.y = prevPosition.y;
 

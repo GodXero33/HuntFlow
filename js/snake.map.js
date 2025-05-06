@@ -11,7 +11,10 @@ export default class SnakeMap {
 
 	setMap (map) {
 		this.map = map;
-		this.bounds = map.objects.map(object => object.bounds);
+		this.bounds = map.objects.filter(object => object.bounds !== undefined).map(object => {
+			object.boundingRect = SnakeMap.getBoundingRect(object.bounds);
+			return object.bounds;
+		});
 	}
 
 	update () {
@@ -31,13 +34,41 @@ export default class SnakeMap {
 			ctx.beginPath();
 			ctx.moveTo(bound[0], bound[1]);
 
-			for (let a = 2; a < bound.length; a += 2) {
+			for (let a = 2; a < bound.length; a += 2)
 				ctx.lineTo(bound[a], bound[a + 1]);
-			}
 
 			ctx.stroke();
 		});
 
+		if (window['UltraSnake2D_in_debug']) {
+			this.map.objects.forEach(object => {
+				if (!object.boundingRect) return;
+
+				ctx.strokeStyle = '#f00';
+				ctx.strokeRect(...object.boundingRect);
+			});
+		}
+
 		ctx.restore();
+	}
+
+	static getBoundingRect (bounds) {
+		let minX = Infinity;
+		let minY = Infinity;
+		let maxX = -Infinity;
+		let maxY = -Infinity;
+
+		for (let a = 0; a < bounds.length; a += 2) {
+			const x = bounds[a];
+			const y = bounds[a + 1];
+
+			if (minX > x) minX = x;
+			if (minY > y) minY = y;
+
+			if (maxX < x) maxX = x;
+			if (maxY < y) maxY = y;
+		}
+
+		return [minX, minY, maxX - minX, maxY - minY];
 	}
 }
