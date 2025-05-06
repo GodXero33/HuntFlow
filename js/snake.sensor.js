@@ -9,7 +9,21 @@ export default class SnakeSensor {
 		this.spread = Math.PI / 2;
 		this.count = count;
 		this.range = range;
-		this.rays = Array.from({ length: this.count }, () => ({ x1: 0, y1: 0, x2: 0, y2: 0, u: 1 }));
+
+		const deltaAngle = this.spread / (this.count - 1);
+		const startAngle = -this.spread / 2;
+		const halfCount = Math.floor(this.count / 2);
+
+		this.rays = Array.from({ length: this.count }, (_, i) => ({
+			x1: 0,
+			y1: 0,
+			x2: 0,
+			y2: 0,
+			u: 1,
+			angle: startAngle + deltaAngle * i,
+			lf: i <= halfCount ? 1 : 0,
+			rf: i > halfCount ? 1 : 0
+		}));
 
 		this.turnLeftFact = 0;
 		this.turnRightFact = 0;
@@ -62,8 +76,6 @@ export default class SnakeSensor {
 	}
 
 	update (bounds) {
-		const deltaAngle = this.spread / (this.count - 1);
-		const startAngle = -this.spread / 2;
 		const snakeHead = this.snake.head;
 		const snakeHeadPositionX = snakeHead.position.x;
 		const snakeHeadPositionY = snakeHead.position.y;
@@ -73,12 +85,10 @@ export default class SnakeSensor {
 		let turnRightFact = 0;
 		const halfCount = Math.floor(this.count / 2);
 
-		for (let a = 0; a < this.count; a++) {
-			const angle = startAngle + deltaAngle * a - snakeHeadRotation;
+		this.rays.forEach(ray => {
+			const angle = ray.angle - snakeHeadRotation;
 			const x = Math.cos(angle) * this.range + snakeHeadPositionX;
 			const y = Math.sin(angle) * this.range + snakeHeadPositionY;
-
-			const ray = this.rays[a];
 
 			ray.x1 = snakeHeadPositionX;
 			ray.y1 = snakeHeadPositionY;
@@ -88,12 +98,9 @@ export default class SnakeSensor {
 
 			this.checkRayIntersection(bounds, ray);
 
-			if (a <= halfCount - 1) {
-				turnLeftFact += ray.u;
-			} else {
-				turnRightFact += ray.u;
-			}
-		}
+			turnLeftFact += ray.u * ray.lf;
+			turnRightFact += ray.u * ray.rf;
+		});
 
 		turnLeftFact = 1 - (turnLeftFact / halfCount) ** 2;
 		turnRightFact = 1 - (turnRightFact / halfCount) ** 2;
