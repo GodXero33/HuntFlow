@@ -77,7 +77,7 @@ export default class SnakeMap {
 			ctx.stroke();
 		});
 
-		if (window['UltraSnake2D_in_debug']) this.drawDebug(ctx);
+		if (window['UltraSnake2D_debug_mode'] === 1) this.drawDebug(ctx);
 
 		ctx.restore();
 	}

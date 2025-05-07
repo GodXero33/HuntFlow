@@ -179,7 +179,7 @@ export default class Snake {
 		ctx.closePath();
 		ctx.fill();
 
-		if (window['UltraSnake2D_in_debug']) {
+		if (window['UltraSnake2D_debug_mode'] === 1) {
 			ctx.fillStyle = '#f00';
 
 			ctx.fillRect(this.tracker.x - 10, this.tracker.y - 10, 20, 20);

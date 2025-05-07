@@ -2,6 +2,9 @@ import { loadMap } from "./map.loader.js";
 import Snake from "./snake.js";
 import SnakeMap from "./snake.map.js";
 
+window['UltraSnake2D_debug_mode'] = 1; // 0 - normal(user view) | 1 - debugging type 1 | 2 - debugging type 2
+window['UltraSnake2D_debug_modes_count'] = 3;
+
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
 const snake = new Snake();
@@ -17,6 +20,8 @@ let pauseOnBlur = false;
 
 let prevTime = 0;
 let deltaTime = 0;
+let fpsUpdateCounter = 0;
+let fps = '0.00 FPS';
 
 let localData;
 
@@ -25,16 +30,41 @@ function draw () {
 	ctx.fillRect(0, 0, width, height);
 
 	snakeMap.draw(ctx);
+
+	if (window['UltraSnake2D_debug_mode'] !== 0) {
+		ctx.font = 'bold 20px Verdana';
+		ctx.textBaseline = 'middle';
+
+		const measure = ctx.measureText(fps);
+
+		ctx.fillStyle = '#ff0000';
+		ctx.fillRect(0, 0, measure.width + 20, 40);
+
+		ctx.fillStyle = '#ffffff';
+		ctx.fillText(fps, 10, 20);
+	}
 }
 
 function update () {
 	snakeMap.update();
 }
 
+function updateFPS () {
+	if (fpsUpdateCounter < 20) {
+		fpsUpdateCounter++;
+		return;
+	}
+
+	fpsUpdateCounter = 0;
+	fps = `${(1000 / deltaTime).toFixed(2)} FPS`;
+}
+
 function animate () {
 	const now = performance.now();
 	deltaTime = now - prevTime;
 	prevTime = now;
+
+	if (window['UltraSnake2D_debug_mode'] !== 0) updateFPS();
 
 	update();
 	draw();
@@ -79,7 +109,7 @@ function init () {
 }
 
 function updateDebugModeVariables () {
-	if (window['UltraSnake2D_in_debug']) {
+	if (window['UltraSnake2D_debug_mode'] == 1) {
 		snakeMap.screenObjectsFilterOffset = 100;
 	} else {
 		snakeMap.screenObjectsFilterOffset = -200;
@@ -95,7 +125,7 @@ window.addEventListener('keyup', event => {
 	}
 
 	if (event.code === 'KeyD') {
-		window['UltraSnake2D_in_debug'] = !window['UltraSnake2D_in_debug'];
+		window['UltraSnake2D_debug_mode'] = (window['UltraSnake2D_debug_mode'] + 1) % window['UltraSnake2D_debug_modes_count'];
 		updateDebugModeVariables();
 	}
 });
@@ -162,5 +192,3 @@ window.addEventListener('DOMContentLoaded', async () => {
 		console.error('Failed to start game: ', error);
 	}
 });
-
-window['UltraSnake2D_in_debug'] = true;
