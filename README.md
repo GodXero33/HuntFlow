@@ -1,1 +1,1 @@
-## UltraSnake2D
+## HuntFlow

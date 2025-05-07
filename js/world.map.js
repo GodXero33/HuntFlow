@@ -1,9 +1,9 @@
 import { loadMapResources } from "./map.loader.js";
 import { isTwoRectangleIntersecting, Vector } from "./util.js";
 
-export default class SnakeMap {
-	constructor (snake) {
-		this.snake = snake;
+export default class WorldMap {
+	constructor (player) {
+		this.player = player;
 		this.map = null;
 
 		this.canvasDimensions = new Vector();
@@ -20,21 +20,21 @@ export default class SnakeMap {
 		this.map = map;
 
 		map.objects.forEach(object => {
-			if (object.bounds !== undefined) object.boundingRect = SnakeMap.getBoundingRect(object.bounds);
+			if (object.bounds !== undefined) object.boundingRect = WorldMap.getBoundingRect(object.bounds);
 		});
 	}
 
-	update () {
+	update (deltaTime) {
 		// Update camera rect
-		this.cameraRect.x = this.snake.camera.x - this.canvasDimensions.x * 0.5 + this.screenObjectsFilterOffset * 0.5;
-		this.cameraRect.y = this.snake.camera.y - this.canvasDimensions.y * 0.5 + this.screenObjectsFilterOffset * 0.5;
+		this.cameraRect.x = this.player.camera.x - this.canvasDimensions.x * 0.5 + this.screenObjectsFilterOffset * 0.5;
+		this.cameraRect.y = this.player.camera.y - this.canvasDimensions.y * 0.5 + this.screenObjectsFilterOffset * 0.5;
 		this.cameraRect.w = this.canvasDimensions.x - this.screenObjectsFilterOffset;
 		this.cameraRect.h = this.canvasDimensions.y - this.screenObjectsFilterOffset;
 
 		this.screenObjects = this.map.objects.filter(object => object.boundingRect && isTwoRectangleIntersecting(object.boundingRect, this.cameraRect));
 
-		if (!this.isGameOver) this.snake.update(this.screenObjects.map(object => object.bounds));
-		if (this.snake.isIntersectedWithBound) this.isGameOver = true;
+		if (!this.isGameOver) this.player.update(deltaTime, this.screenObjects.map(object => object.bounds));
+		if (this.player.isIntersectedWithBound) this.isGameOver = true;
 	}
 
 	drawDebug (ctx) {
@@ -51,16 +51,14 @@ export default class SnakeMap {
 		ctx.setLineDash([]);
 
 		// draw camera
-		const offset = this.screenObjectsFilterOffset / 2;
-
 		ctx.strokeStyle = '#0f0';
 		ctx.strokeRect(this.cameraRect.x, this.cameraRect.y, this.cameraRect.w, this.cameraRect.h);
 	}
 
 	draw (ctx) {
 		ctx.save();
-		ctx.translate(this.canvasDimensions.x * 0.5 - this.snake.camera.x, this.canvasDimensions.y * 0.5 - this.snake.camera.y);
-		this.snake.draw(ctx);
+		ctx.translate(this.canvasDimensions.x * 0.5 - this.player.camera.x, this.canvasDimensions.y * 0.5 - this.player.camera.y);
+		this.player.draw(ctx);
 
 		ctx.strokeStyle = '#ffffff';
 		ctx.lineWidth = 2;

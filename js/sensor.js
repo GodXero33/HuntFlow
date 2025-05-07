@@ -1,10 +1,10 @@
 import { getIntersectionOfTwoLines } from "./util.js";
 
-export default class SnakeSensor {
-	constructor (snake, count, range) {
+export default class Sensor {
+	constructor (player, count, range) {
 		count = count % 2 == 0 ? count : count + 1;
 
-		this.snake = snake;
+		this.player = player;
 
 		this.spread = Math.PI / 2;
 		this.count = count;
@@ -76,22 +76,22 @@ export default class SnakeSensor {
 	}
 
 	update (bounds) {
-		const snakeHead = this.snake.head;
-		const snakeHeadPositionX = snakeHead.position.x;
-		const snakeHeadPositionY = snakeHead.position.y;
-		const snakeHeadRotation = snakeHead.rotation;
+		const player = this.player;
+		const playerPositionX = player.position.x;
+		const playerPositionY = player.position.y;
+		const playerRotation = player.rotation;
 
 		let turnLeftFact = 0;
 		let turnRightFact = 0;
 		const halfCount = Math.floor(this.count / 2);
 
 		this.rays.forEach(ray => {
-			const angle = ray.angle - snakeHeadRotation;
-			const x = Math.cos(angle) * this.range + snakeHeadPositionX;
-			const y = Math.sin(angle) * this.range + snakeHeadPositionY;
+			const angle = ray.angle + playerRotation;
+			const x = Math.cos(angle) * this.range + playerPositionX;
+			const y = Math.sin(angle) * this.range + playerPositionY;
 
-			ray.x1 = snakeHeadPositionX;
-			ray.y1 = snakeHeadPositionY;
+			ray.x1 = playerPositionX;
+			ray.y1 = playerPositionY;
 			ray.x2 = x;
 			ray.y2 = y;
 			ray.u = 1;

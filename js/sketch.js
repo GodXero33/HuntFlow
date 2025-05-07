@@ -1,16 +1,16 @@
 import { loadMap } from "./map.loader.js";
-import Snake from "./snake.js";
-import SnakeMap from "./snake.map.js";
+import Player from "./player.js";
+import WorldMap from "./world.map.js";
 
 window['UltraSnake2D_debug_mode'] = 1; // 0 - normal(user view) | 1 - debugging type 1 | 2 - debugging type 2
 window['UltraSnake2D_debug_modes_count'] = 3;
 
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
-const snake = new Snake();
-const snakeMap = new SnakeMap(snake);
+const player = new Player();
+const worldMap = new WorldMap(player);
 
-console.log(snakeMap);
+console.log(worldMap);
 
 let width, height;
 
@@ -18,6 +18,9 @@ let isPlaying = false;
 let nextAnimationFrame = null;
 let pauseOnBlur = false;
 
+const controlFps = 60;
+const frameDuration = 1000 / controlFps;
+let accumulator = 0;
 let prevTime = 0;
 let deltaTime = 0;
 let fpsUpdateCounter = 0;
@@ -29,7 +32,7 @@ function draw () {
 	ctx.fillStyle = '#000000';
 	ctx.fillRect(0, 0, width, height);
 
-	snakeMap.draw(ctx);
+	worldMap.draw(ctx);
 
 	if (window['UltraSnake2D_debug_mode'] !== 0) {
 		ctx.font = 'bold 20px Verdana';
@@ -45,8 +48,8 @@ function draw () {
 	}
 }
 
-function update () {
-	snakeMap.update();
+function update (deltaTime) {
+	worldMap.update(deltaTime);
 }
 
 function updateFPS () {
@@ -61,13 +64,20 @@ function updateFPS () {
 
 function animate () {
 	const now = performance.now();
-	deltaTime = now - prevTime;
+	const elapsed = now - prevTime;
 	prevTime = now;
+	accumulator += elapsed;
+
+	while (accumulator >= frameDuration) {
+		deltaTime = frameDuration;
+
+		update(deltaTime);
+		draw();
+
+		accumulator -= frameDuration;
+	}
 
 	if (window['UltraSnake2D_debug_mode'] !== 0) updateFPS();
-
-	update();
-	draw();
 
 	nextAnimationFrame = requestAnimationFrame(animate);
 }
@@ -94,11 +104,11 @@ function resize () {
 	canvas.width = width;
 	canvas.height = height;
 
-	snake.canvasDimensions.x = width;
-	snake.canvasDimensions.y = height;
+	player.canvasDimensions.x = width;
+	player.canvasDimensions.y = height;
 
-	snakeMap.canvasDimensions.x = width;
-	snakeMap.canvasDimensions.y = height;
+	worldMap.canvasDimensions.x = width;
+	worldMap.canvasDimensions.y = height;
 
 	draw();
 }
@@ -110,9 +120,9 @@ function init () {
 
 function updateDebugModeVariables () {
 	if (window['UltraSnake2D_debug_mode'] == 1) {
-		snakeMap.screenObjectsFilterOffset = 100;
+		worldMap.screenObjectsFilterOffset = 100;
 	} else {
-		snakeMap.screenObjectsFilterOffset = -200;
+		worldMap.screenObjectsFilterOffset = -200;
 	}
 }
 
@@ -148,25 +158,25 @@ window.addEventListener('focus', () => {
 });
 
 window.addEventListener('mousedown', event => {
-	snake.mouse.x = event.x;
-	snake.mouse.y = event.y;
+	player.mouse.x = event.x;
+	player.mouse.y = event.y;
 
-	snake.mousedown = true;
+	player.mousedown = true;
 });
 
 window.addEventListener('mousemove', event => {
-	if (snake.mousedown) {
-		snake.mouse.x = event.x;
-		snake.mouse.y = event.y;
+	if (player.mousedown) {
+		player.mouse.x = event.x;
+		player.mouse.y = event.y;
 	}
 });
 
 window.addEventListener('mouseup', () => {
-	snake.mousedown = false;
+	player.mousedown = false;
 });
 
 function loadLocalData () {
-	const localDataString = localStorage.getItem('ultra-snake-2d');
+	const localDataString = localStorage.getItem('HuntFlow-data');
 
 	if (localDataString == null) {
 		localData = {
@@ -176,7 +186,7 @@ function loadLocalData () {
 		localData = JSON.parse(localDataString);
 	}
 
-	localStorage.setItem('ultra-snake-2d', JSON.stringify(localData));
+	localStorage.setItem('HuntFlow-data', JSON.stringify(localData));
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
@@ -186,7 +196,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 		const mapData = await loadMap(localData.mapIndex);
 
 		console.log(mapData);
-		await snakeMap.setMap(mapData);
+		await worldMap.setMap(mapData);
 		init();
 	} catch (error) {
 		console.error('Failed to start game: ', error);
