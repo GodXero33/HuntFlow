@@ -1,12 +1,12 @@
 import { getIntersectionOfTwoLines } from "./util.js";
 
 export default class Sensor {
-	constructor (player, count, range) {
+	constructor (player, count, range, spread) {
 		count = count % 2 == 0 ? count : count + 1;
 
 		this.player = player;
 
-		this.spread = Math.PI / 2;
+		this.spread = spread;
 		this.count = count;
 		this.range = range;
 
@@ -102,8 +102,8 @@ export default class Sensor {
 			turnRightFact += ray.u * ray.rf;
 		});
 
-		turnLeftFact = 1 - turnLeftFact / halfCount;
-		turnRightFact = 1 - turnRightFact / halfCount;
+		turnLeftFact = 1 - (turnLeftFact / halfCount) ** 2;
+		turnRightFact = 1 - (turnRightFact / halfCount) ** 2;
 
 		this.turnLeftFact = turnLeftFact;
 		this.turnRightFact = turnRightFact;

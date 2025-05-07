@@ -114,6 +114,13 @@ function resize () {
 }
 
 function init () {
+	player.setPlayerData({
+		size: 40,
+		bounds: [-18, -18, 18, -18, 18, 18, -18, 18, -18, -18],
+		minimumTrackerDistance: 50,
+		maximumTrackerDistance: 500
+	});
+
 	resize();
 	play();
 }
