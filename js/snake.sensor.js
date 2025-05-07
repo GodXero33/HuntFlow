@@ -102,8 +102,8 @@ export default class SnakeSensor {
 			turnRightFact += ray.u * ray.rf;
 		});
 
-		turnLeftFact = 1 - (turnLeftFact / halfCount) ** 2;
-		turnRightFact = 1 - (turnRightFact / halfCount) ** 2;
+		turnLeftFact = 1 - turnLeftFact / halfCount;
+		turnRightFact = 1 - turnRightFact / halfCount;
 
 		this.turnLeftFact = turnLeftFact;
 		this.turnRightFact = turnRightFact;
