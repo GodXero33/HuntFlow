@@ -1,6 +1,5 @@
 import SnakeSensor from "./snake.sensor.js";
-import { angleDifference, getIntersectionOfTwoLines } from "./util.js";
-import Vector from "./vector.js";
+import { angleDifference, getIntersectionOfTwoLines, Vector } from "./util.js";
 
 class SnakeBodyPiece {
 	constructor (x, y, size) {

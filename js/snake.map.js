@@ -1,5 +1,4 @@
-import { isTwoRectangleIntersecting } from "./util.js";
-import Vector from "./vector.js";
+import { isTwoRectangleIntersecting, Vector } from "./util.js";
 
 export default class SnakeMap {
 	constructor (snake) {
