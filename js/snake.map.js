@@ -1,3 +1,4 @@
+import { loadMapResources } from "./map.loader.js";
 import { isTwoRectangleIntersecting, Vector } from "./util.js";
 
 export default class SnakeMap {
@@ -14,11 +15,12 @@ export default class SnakeMap {
 		this.cameraRect = { x: 0, y: 0, w: 0, h: 0 };
 	}
 
-	setMap (map) {
+	async setMap (map) {
+		this.resources = await loadMapResources(map);
 		this.map = map;
-		this.bounds = map.objects.filter(object => object.bounds !== undefined).map(object => {
-			object.boundingRect = SnakeMap.getBoundingRect(object.bounds);
-			return object.bounds;
+
+		map.objects.forEach(object => {
+			if (object.bounds !== undefined) object.boundingRect = SnakeMap.getBoundingRect(object.bounds);
 		});
 	}
 

@@ -1,3 +1,4 @@
+import { loadMap } from "./map.loader.js";
 import Snake from "./snake.js";
 import SnakeMap from "./snake.map.js";
 
@@ -136,7 +137,7 @@ window.addEventListener('mouseup', () => {
 
 function loadLocalData () {
 	const localDataString = localStorage.getItem('ultra-snake-2d');
-	
+
 	if (localDataString == null) {
 		localData = {
 			mapIndex: 1
@@ -148,16 +149,6 @@ function loadLocalData () {
 	localStorage.setItem('ultra-snake-2d', JSON.stringify(localData));
 }
 
-async function loadMap (mapIndex) {
-	return new Promise((resolve, reject) => {
-		fetch(`maps/${mapIndex.toString().padStart(5, '0')}.json`).then(response => {
-			if (!response) throw new Error('Failed to fetch map data');
-
-			return response.json();
-		}).then(mapData => resolve(mapData)).catch(error => reject(error));
-	});
-}
-
 window.addEventListener('DOMContentLoaded', async () => {
 	try {
 		loadLocalData();
@@ -165,7 +156,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 		const mapData = await loadMap(localData.mapIndex);
 
 		console.log(mapData);
-		snakeMap.setMap(mapData);
+		await snakeMap.setMap(mapData);
 		init();
 	} catch (error) {
 		console.error('Failed to start game: ', error);
