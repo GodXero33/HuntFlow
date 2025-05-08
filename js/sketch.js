@@ -112,6 +112,8 @@ function resize () {
 	worldMap.canvasDimensions.x = width;
 	worldMap.canvasDimensions.y = height;
 
+	worldMap.updateScaleFactor();
+
 	draw();
 }
 
@@ -198,7 +200,12 @@ document.addEventListener("pointerlockerror", () => {
 	console.error("Pointer lock failed");
 }, false);
 
-canvas.addEventListener("click", async (event) => {
+canvas.addEventListener("click", async () => {
+	if (isPointerLocked) {
+		// in game click action
+		return;
+	}
+
 	if (!document.pointerLockElement) {
 		await canvas.requestPointerLock({
 			unadjustedMovement: true

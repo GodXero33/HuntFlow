@@ -20,6 +20,7 @@ class Player {
 
 		this.speed = 0.15;
 		this.steeringFact = 0.002;
+		this.visionRange = 900;
 
 		this.canvasDimensions = new Vector();
 		this.originalBounds = [];
