@@ -19,6 +19,7 @@ let isPlaying = false;
 let isPointerLocked = false;
 let nextAnimationFrame = null;
 let pauseOnBlur = false;
+let isGameOver = false;
 
 const controlFps = 60;
 const frameDuration = 1000 / controlFps;
@@ -51,6 +52,8 @@ function draw () {
 }
 
 function update (deltaTime) {
+	if (isGameOver) return;
+
 	worldMap.update(deltaTime);
 }
 

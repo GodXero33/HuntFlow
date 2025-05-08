@@ -5,9 +5,7 @@ export default class WorldMap {
 	constructor (player) {
 		this.player = player;
 		this.map = null;
-
 		this.canvasDimensions = new Vector();
-		this.isGameOver = false;
 
 		this.screenObjects = [];
 		this.screenObjectsFilterOffset = 200;
@@ -78,8 +76,7 @@ export default class WorldMap {
 
 		this.screenObjects = this.map.objects.filter(object => object.boundingRect && isTwoRectangleIntersecting(object.boundingRect, this.rotatedCameraRect));
 
-		if (!this.isGameOver) this.player.update(deltaTime, this.screenObjects.map(object => object.bounds));
-		if (this.player.isIntersectedWithBound) this.isGameOver = true;
+		this.player.update(deltaTime, this.screenObjects.map(object => object.bounds));
 	}
 
 	drawDebug (ctx) {
@@ -101,7 +98,7 @@ export default class WorldMap {
 		ctx.translate(this.player.position.x, this.player.position.y);
 		ctx.rotate(this.player.rotation);
 		ctx.strokeStyle = '#0f0';
-		ctx.strokeRect((-this.canvasDimensions.x * 0.5 + this.screenObjectsFilterOffset * 0.5 )/ this.scaleFactor, (-this.canvasDimensions.y * 0.5 + this.screenObjectsFilterOffset * 0.5) / this.scaleFactor, this.cameraRect.w, this.cameraRect.h);
+		ctx.strokeRect((-this.canvasDimensions.x * 0.5 + this.screenObjectsFilterOffset * 0.5 ) / this.scaleFactor, (-this.canvasDimensions.y * 0.5 + this.screenObjectsFilterOffset * 0.5) / this.scaleFactor, this.cameraRect.w, this.cameraRect.h);
 		ctx.setTransform(transform);
 
 		ctx.strokeStyle = '#00f';
