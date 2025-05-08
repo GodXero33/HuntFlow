@@ -1,55 +1,48 @@
-import Sensor from "./sensor.js";
 import { angleDifference, getIntersectionOfTwoLines, Vector } from "./util.js";
-import WorldMap from "./world.map.js";
 
-export default class Player {
+class PlayerControls {
 	constructor () {
-		this.camera = new Vector();
-		this.cameraUpdateDistance = 100;
-		this.isCameraUpdating = false;
-		this.cameraDampingFact = 0.01;
+		this.turnLeft = false;
+		this.turnRight = false;
+		this.forward = false;
+		this.backward = false;
+	}
 
+	update (deltaTime) {}
+}
+
+class Player {
+	constructor () {
 		this.position = new Vector();
-		this.tracker = new Vector();
-
-		this.speed = 1.5;
-		this.turnSpeed = 0.08;
 		this.rotation = -Math.PI / 2;
 
-		this.mouse = new Vector();
-		this.mousedown = false;
+		this.speed = 1.5;
+		this.steeringFact = 0.05;
 
 		this.canvasDimensions = new Vector();
-
-		this.steeringFact = 0.1;
-		this.sensorTurnTriggerThreshold = 0.5;
-		this.sensorTriggerSteeringFact = 0.1;
-
 		this.originalBounds = [];
 		this.bounds = [];
-		
-		this.sensor = new Sensor(this, 20, 150, Math.PI);
-		this.sensorEnabled = true;
 
-		this.maximumTrackerDistance = 0;
-		this.minimumTrackerDistance = 0;
-
-		this.drawSize = 40;
+		this.drawSize = 0;
 		this.color = '#994476';
 		this.isIntersectedWithBound = false;
+
+		this.controls = new PlayerControls(this);
 	}
 
 	updateMovement (deltaTime) {
-		const targetAngle = Math.atan2(this.tracker.y - this.position.y, this.tracker.x - this.position.x);
-		let deltaAngle = angleDifference(targetAngle, this.rotation);
+		if (this.controls.turnLeft) this.rotation -= this.steeringFact;
+		if (this.controls.turnRight) this.rotation += this.steeringFact;
 
-		this.rotation += deltaAngle * this.steeringFact;
+		if (this.controls.forward) {
+			this.position.x += Math.cos(this.rotation - Math.PI / 2) * this.speed;
+			this.position.y += Math.sin(this.rotation - Math.PI / 2) * this.speed;
+		}
 
-		const deltaX = Math.cos(this.rotation) * this.speed;
-		const deltaY = Math.sin(this.rotation) * this.speed;
-
-		this.position.x += deltaX;
-		this.position.y += deltaY;
+		if (this.controls.backward) {
+			this.position.x += Math.cos(this.rotation + Math.PI / 2) * this.speed;
+			this.position.y += Math.sin(this.rotation + Math.PI / 2) * this.speed;
+		}
 
 		const cos = Math.cos(this.rotation);
 		const sin = Math.sin(this.rotation);
@@ -64,21 +57,6 @@ export default class Player {
 			this.bounds[a] = this.position.x + rotatedX;
 			this.bounds[a + 1] = this.position.y + rotatedY;
 		}
-
-		if (this.sensorEnabled) {
-			if (Math.abs(this.sensor.turnLeftFact) > this.sensorTurnTriggerThreshold) this.rotation += this.sensor.turnLeftFact * this.sensorTriggerSteeringFact;
-			if (Math.abs(this.sensor.turnRightFact) > this.sensorTurnTriggerThreshold) this.rotation -= this.sensor.turnRightFact * this.sensorTriggerSteeringFact;
-		}
-	}
-
-	updateCamera (deltaTime) {
-		this.camera.x += (this.position.x - this.camera.x) * this.speed * this.cameraDampingFact;
-		this.camera.y += (this.position.y - this.camera.y) * this.speed * this.cameraDampingFact;
-	}
-
-	updateTracker () {
-		this.tracker.x = this.mouse.x - this.canvasDimensions.x * 0.5 + this.camera.x;
-		this.tracker.y = this.mouse.y - this.canvasDimensions.y * 0.5 + this.camera.y;
 	}
 
 	checkCollision (bounds) {
@@ -102,13 +80,7 @@ export default class Player {
 	}
 
 	update (deltaTime, bounds) {
-		const distanceToTracker = Vector.dist(this.tracker, this.position);
-
-		if (this.sensorEnabled) this.sensor.update(bounds);
-		if (distanceToTracker > this.minimumTrackerDistance && distanceToTracker < this.maximumTrackerDistance) this.updateMovement(deltaTime);
-		if (this.mousedown) this.updateTracker();
-
-		this.updateCamera(deltaTime);
+		this.updateMovement(deltaTime);
 
 		this.isIntersectedWithBound = this.checkCollision(bounds);
 	}
@@ -140,11 +112,6 @@ export default class Player {
 
 			ctx.stroke();
 			ctx.setLineDash([]);
-
-			ctx.fillStyle = '#ff0000';
-
-			ctx.fillRect(this.tracker.x - 10, this.tracker.y - 10, 20, 20);
-			if (this.sensorEnabled) this.sensor.draw(ctx);
 		}
 	}
 
@@ -159,3 +126,8 @@ export default class Player {
 		this.maximumTrackerDistance = data.maximumTrackerDistance;
 	}
 }
+
+export {
+	Player,
+	PlayerControls
+};

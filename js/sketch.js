@@ -1,5 +1,5 @@
 import { loadMap } from "./map.loader.js";
-import Player from "./player.js";
+import { Player } from "./player.js";
 import WorldMap from "./world.map.js";
 
 window['UltraSnake2D_debug_mode'] = 1; // 0 - normal(user view) | 1 - debugging type 1 | 2 - debugging type 2
@@ -116,9 +116,7 @@ function resize () {
 function init () {
 	player.setPlayerData({
 		size: 40,
-		bounds: [-18, -18, 18, -18, 18, 18, -18, 18, -18, -18],
-		minimumTrackerDistance: 50,
-		maximumTrackerDistance: 500
+		bounds: [-18, -18, 18, -18, 18, 18, -18, 18, -18, -18]
 	});
 
 	resize();
@@ -135,16 +133,28 @@ function updateDebugModeVariables () {
 
 window.addEventListener('resize', resize);
 
+window.addEventListener('keydown', event => {
+	if (event.code === 'KeyW') player.controls.forward = true;
+	if (event.code === 'KeyS') player.controls.backward = true;
+	if (event.code === 'KeyD') player.controls.turnRight = true;
+	if (event.code === 'KeyA') player.controls.turnLeft = true;
+});
+
 window.addEventListener('keyup', event => {
 	if (event.code === 'Space') {
 		isPlaying ? pause() : play();
 		return;
 	}
 
-	if (event.code === 'KeyD') {
+	if (event.code === 'KeyF') {
 		window['UltraSnake2D_debug_mode'] = (window['UltraSnake2D_debug_mode'] + 1) % window['UltraSnake2D_debug_modes_count'];
 		updateDebugModeVariables();
 	}
+
+	if (event.code === 'KeyW') player.controls.forward = false;
+	if (event.code === 'KeyS') player.controls.backward = false;
+	if (event.code === 'KeyD') player.controls.turnRight = false;
+	if (event.code === 'KeyA') player.controls.turnLeft = false;
 });
 
 window.addEventListener('blur', () => {
@@ -165,21 +175,15 @@ window.addEventListener('focus', () => {
 });
 
 window.addEventListener('mousedown', event => {
-	player.mouse.x = event.x;
-	player.mouse.y = event.y;
-
-	player.mousedown = true;
+	
 });
 
 window.addEventListener('mousemove', event => {
-	if (player.mousedown) {
-		player.mouse.x = event.x;
-		player.mouse.y = event.y;
-	}
+	
 });
 
 window.addEventListener('mouseup', () => {
-	player.mousedown = false;
+	
 });
 
 function loadLocalData () {
