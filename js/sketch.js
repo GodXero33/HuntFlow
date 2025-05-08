@@ -1,6 +1,5 @@
 import { loadMap } from "./map.loader.js";
 import { Player } from "./player.js";
-import { Vector } from "./util.js";
 import WorldMap from "./world.map.js";
 
 window['UltraSnake2D_debug_mode'] = 1; // 0 - normal(user view) | 1 - debugging type 1 | 2 - debugging type 2
@@ -11,7 +10,7 @@ const ctx = canvas.getContext('2d');
 const player = new Player();
 const worldMap = new WorldMap(player);
 
-console.log(worldMap);
+console.log(worldMap, navigator.userAgentData);
 
 let width, height;
 
