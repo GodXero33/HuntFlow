@@ -1,5 +1,6 @@
 import { loadMap } from "./map.loader.js";
 import { Player } from "./player.js";
+import { Vector } from "./util.js";
 import WorldMap from "./world.map.js";
 
 window['UltraSnake2D_debug_mode'] = 1; // 0 - normal(user view) | 1 - debugging type 1 | 2 - debugging type 2
@@ -15,6 +16,7 @@ console.log(worldMap);
 let width, height;
 
 let isPlaying = false;
+let isPointerLocked = false;
 let nextAnimationFrame = null;
 let pauseOnBlur = false;
 
@@ -134,10 +136,12 @@ function updateDebugModeVariables () {
 window.addEventListener('resize', resize);
 
 window.addEventListener('keydown', event => {
+	if (!isPointerLocked) return;
+
 	if (event.code === 'KeyW') player.controls.forward = true;
 	if (event.code === 'KeyS') player.controls.backward = true;
-	if (event.code === 'KeyD') player.controls.turnRight = true;
-	if (event.code === 'KeyA') player.controls.turnLeft = true;
+	if (event.code === 'KeyD') player.controls.right = true;
+	if (event.code === 'KeyA') player.controls.left = true;
 });
 
 window.addEventListener('keyup', event => {
@@ -153,8 +157,8 @@ window.addEventListener('keyup', event => {
 
 	if (event.code === 'KeyW') player.controls.forward = false;
 	if (event.code === 'KeyS') player.controls.backward = false;
-	if (event.code === 'KeyD') player.controls.turnRight = false;
-	if (event.code === 'KeyA') player.controls.turnLeft = false;
+	if (event.code === 'KeyD') player.controls.right = false;
+	if (event.code === 'KeyA') player.controls.left = false;
 });
 
 window.addEventListener('blur', () => {
@@ -174,16 +178,32 @@ window.addEventListener('focus', () => {
 	pauseOnBlur = false;
 });
 
-window.addEventListener('mousedown', event => {
-	
-});
-
 window.addEventListener('mousemove', event => {
-	
+	if (isPointerLocked) player.rotateBy(event.movementX);
 });
 
-window.addEventListener('mouseup', () => {
-	
+document.addEventListener("pointerlockchange", () => {
+	if (document.pointerLockElement === canvas) {
+		// play();
+		isPointerLocked = true;
+		console.log("The pointer lock status is now locked");
+	} else {
+		// pause();
+		isPointerLocked = false;
+		console.log("The pointer lock status is now unlocked");
+	}
+}, false);
+
+document.addEventListener("pointerlockerror", () => {
+	console.error("Pointer lock failed");
+}, false);
+
+canvas.addEventListener("click", async (event) => {
+	if (!document.pointerLockElement) {
+		await canvas.requestPointerLock({
+			unadjustedMovement: true
+		});
+	}
 });
 
 function loadLocalData () {

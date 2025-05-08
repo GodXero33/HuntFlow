@@ -1,4 +1,4 @@
-import { angleDifference, getIntersectionOfTwoLines, Vector } from "./util.js";
+import {  getIntersectionOfTwoLines, Vector } from "./util.js";
 
 class PlayerControls {
 	constructor () {
@@ -6,18 +6,20 @@ class PlayerControls {
 		this.turnRight = false;
 		this.forward = false;
 		this.backward = false;
+		this.left = false;
+		this.right = false;
 	}
-
-	update (deltaTime) {}
 }
 
 class Player {
+	static SQRT_2 = Math.sqrt(2);
+
 	constructor () {
 		this.position = new Vector();
 		this.rotation = -Math.PI / 2;
 
-		this.speed = 1.5;
-		this.steeringFact = 0.05;
+		this.speed = 0.15;
+		this.steeringFact = 0.002;
 
 		this.canvasDimensions = new Vector();
 		this.originalBounds = [];
@@ -31,17 +33,28 @@ class Player {
 	}
 
 	updateMovement (deltaTime) {
-		if (this.controls.turnLeft) this.rotation -= this.steeringFact;
-		if (this.controls.turnRight) this.rotation += this.steeringFact;
+		let movementSpeed = this.speed * deltaTime;
+
+		if ((this.controls.right || this.controls.left) && (this.controls.forward || this.controls.backward)) movementSpeed /= Player.SQRT_2;
+
+		if (this.controls.right) {
+			this.position.x += Math.cos(this.rotation) * movementSpeed;
+			this.position.y += Math.sin(this.rotation) * movementSpeed;
+		}
+
+		if (this.controls.left) {
+			this.position.x += Math.cos(this.rotation + Math.PI) * movementSpeed;
+			this.position.y += Math.sin(this.rotation + Math.PI) * movementSpeed;
+		}
 
 		if (this.controls.forward) {
-			this.position.x += Math.cos(this.rotation - Math.PI / 2) * this.speed;
-			this.position.y += Math.sin(this.rotation - Math.PI / 2) * this.speed;
+			this.position.x += Math.cos(this.rotation - Math.PI / 2) * movementSpeed;
+			this.position.y += Math.sin(this.rotation - Math.PI / 2) * movementSpeed;
 		}
 
 		if (this.controls.backward) {
-			this.position.x += Math.cos(this.rotation + Math.PI / 2) * this.speed;
-			this.position.y += Math.sin(this.rotation + Math.PI / 2) * this.speed;
+			this.position.x += Math.cos(this.rotation + Math.PI / 2) * movementSpeed;
+			this.position.y += Math.sin(this.rotation + Math.PI / 2) * movementSpeed;
 		}
 
 		const cos = Math.cos(this.rotation);
@@ -124,6 +137,10 @@ class Player {
 		this.drawSize = data.size;
 		this.minimumTrackerDistance = data.minimumTrackerDistance;
 		this.maximumTrackerDistance = data.maximumTrackerDistance;
+	}
+
+	rotateBy (dx) {
+		this.rotation += dx * this.steeringFact;
 	}
 }
 
