@@ -7,11 +7,17 @@ export default class WorldMap {
 		this.map = null;
 		this.canvasDimensions = new Vector();
 
-		this.screenObjects = [];
-		this.screenObjectsFilterOffset = 200;
+		this.visibleObjects = [];
+		this.visibleObjectsFilterOffset = 200;
+
+		this.updatableObjects = [];
+		this.updatableObjectsFilterOffset = -this.player.visionRange;
 
 		this.cameraRect = { x: 0, y: 0, w: 0, h: 0 };
 		this.rotatedCameraRect = { x: 0, y: 0, w: 0, h: 0 };
+
+		this.updatableCameraRect = { x: 0, y: 0, w: 0, h: 0 };
+		this.rotatedUpdatableCameraRect = { x: 0, y: 0, w: 0, h: 0 };
 
 		this.scaleFactor = 1;
 	}
@@ -65,18 +71,27 @@ export default class WorldMap {
 		// Update camera rect
 		const scaledCanvasW = this.canvasDimensions.x / this.scaleFactor;
 		const scaledCanvasH = this.canvasDimensions.y / this.scaleFactor;
-		const scaledOffset = this.screenObjectsFilterOffset / this.scaleFactor;
+		const scaledOffsetForVisible = this.visibleObjectsFilterOffset / this.scaleFactor;
 
-		this.cameraRect.x = this.player.position.x - scaledCanvasW * 0.5 + scaledOffset * 0.5;
-		this.cameraRect.y = this.player.position.y - scaledCanvasH * 0.5 + scaledOffset * 0.5;
-		this.cameraRect.w = scaledCanvasW - scaledOffset;
-		this.cameraRect.h = scaledCanvasH - scaledOffset;
+		this.cameraRect.x = this.player.position.x - scaledCanvasW * 0.5 + scaledOffsetForVisible * 0.5;
+		this.cameraRect.y = this.player.position.y - scaledCanvasH * 0.5 + scaledOffsetForVisible * 0.5;
+		this.cameraRect.w = scaledCanvasW - scaledOffsetForVisible;
+		this.cameraRect.h = scaledCanvasH - scaledOffsetForVisible;
+
+		const scaledOffsetForUpdate = this.updatableObjectsFilterOffset / this.scaleFactor;
+
+		this.updatableCameraRect.x = this.player.position.x - scaledCanvasW * 0.5 + scaledOffsetForUpdate * 0.5;
+		this.updatableCameraRect.y = this.player.position.y - scaledCanvasH * 0.5 + scaledOffsetForUpdate * 0.5;
+		this.updatableCameraRect.w = scaledCanvasW - scaledOffsetForUpdate;
+		this.updatableCameraRect.h = scaledCanvasH - scaledOffsetForUpdate;
 
 		this.rotatedCameraRect = this.getRotatedCameraRect(this.cameraRect, -this.player.rotation);
+		this.rotatedUpdatableCameraRect = this.getRotatedCameraRect(this.updatableCameraRect, -this.player.rotation);
 
-		this.screenObjects = this.map.objects.filter(object => object.boundingRect && isTwoRectangleIntersecting(object.boundingRect, this.rotatedCameraRect));
+		this.visibleObjects = this.map.objects.filter(object => object.boundingRect && isTwoRectangleIntersecting(object.boundingRect, this.rotatedCameraRect));
+		this.updatableObjects = this.map.objects.filter(object => object.boundingRect && isTwoRectangleIntersecting(object.boundingRect, this.rotatedUpdatableCameraRect));
 
-		this.player.update(deltaTime, this.screenObjects.map(object => object.bounds));
+		this.player.update(deltaTime, this.updatableObjects.map(object => object.bounds));
 	}
 
 	drawDebug (ctx) {
@@ -84,7 +99,7 @@ export default class WorldMap {
 		ctx.strokeStyle = '#f00';
 		ctx.setLineDash([5, 10]);
 
-		this.screenObjects.forEach(object => {
+		this.visibleObjects.forEach(object => {
 			if (!object.boundingRect) return;
 
 			ctx.strokeRect(object.boundingRect.x, object.boundingRect.y, object.boundingRect.w, object.boundingRect.h);
@@ -98,7 +113,7 @@ export default class WorldMap {
 		ctx.translate(this.player.position.x, this.player.position.y);
 		ctx.rotate(this.player.rotation);
 		ctx.strokeStyle = '#0f0';
-		ctx.strokeRect((-this.canvasDimensions.x * 0.5 + this.screenObjectsFilterOffset * 0.5 ) / this.scaleFactor, (-this.canvasDimensions.y * 0.5 + this.screenObjectsFilterOffset * 0.5) / this.scaleFactor, this.cameraRect.w, this.cameraRect.h);
+		ctx.strokeRect((-this.canvasDimensions.x * 0.5 + this.visibleObjectsFilterOffset * 0.5 ) / this.scaleFactor, (-this.canvasDimensions.y * 0.5 + this.visibleObjectsFilterOffset * 0.5) / this.scaleFactor, this.cameraRect.w, this.cameraRect.h);
 		ctx.setTransform(transform);
 
 		ctx.strokeStyle = '#00f';
@@ -116,7 +131,7 @@ export default class WorldMap {
 		ctx.strokeStyle = '#ffffff';
 		ctx.lineWidth = 2;
 
-		this.screenObjects.forEach(object => {
+		this.visibleObjects.forEach(object => {
 			const bound = object.bounds;
 
 			ctx.beginPath();
