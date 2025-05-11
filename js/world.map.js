@@ -128,7 +128,7 @@ export default class WorldMap {
 		ctx.translate(-this.player.position.x, -this.player.position.y);
 		this.player.draw(ctx);
 
-		ctx.strokeStyle = '#ffffff88';
+		ctx.strokeStyle = '#ffffff22';
 		ctx.lineWidth = 2;
 
 		this.visibleObjects.forEach(object => {

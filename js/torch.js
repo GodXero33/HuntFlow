@@ -8,6 +8,7 @@ export default class Torch {
 		this.dense = 100;
 		this.rays = Array.from({ length: this.dense }, () => new Vector());
 		this.polygon = [];
+		this.lightenBounds = [];
 	}
 
 	draw (ctx) {
@@ -28,6 +29,19 @@ export default class Torch {
 		}
 
 		ctx.fill();
+
+		ctx.strokeStyle = '#ffffff';
+		ctx.lineWidth = 2;
+
+		this.lightenBounds.forEach(bound => {
+			ctx.globalAlpha = 1 - bound[4] ** 2;
+			ctx.beginPath();
+			ctx.moveTo(bound[0], bound[1]);
+			ctx.lineTo(bound[2], bound[3]);
+			ctx.stroke();
+		});
+
+		ctx.globalAlpha = 1;
 	}
 
 	update (bounds) {
@@ -37,33 +51,58 @@ export default class Torch {
 		const startAngle = this.player.rotation - this.spread / 2 - Math.PI / 2;
 
 		this.polygon.length = 0;
+		this.lightenBounds.length = 0;
 
 		this.polygon.push(playerX, playerY);
+
+		let prevLightenBounds = null;
 
 		for (let a = 0; a < this.dense; a++) {
 			let x = Math.cos(startAngle + a * deltaAngle) * this.range + playerX;
 			let y = Math.sin(startAngle + a * deltaAngle) * this.range + playerY;
 
 			let shortestIntersection = null;
+			let shortestIntersectionLine = null;
 
 			bounds.forEach(bound => {
-				for (let a = 0; a < bound.length - 2; a += 2) {
-					const intersection = getIntersectionOfTwoLines(playerX, playerY, x, y, bound[a], bound[a + 1], bound[a + 2], bound[a + 3]);
+				for (let b = 0; b < bound.length - 2; b += 2) {
+					const intersection = getIntersectionOfTwoLines(playerX, playerY, x, y, bound[b], bound[b + 1], bound[b + 2], bound[b + 3]);
 
 					if (!intersection) continue;
 
 					if (!shortestIntersection) {
 						shortestIntersection = intersection;
+						shortestIntersectionLine = [bound[b], bound[b + 1], bound[b + 2], bound[b + 3]];
 						continue;
 					}
 
-					if (intersection[2] < shortestIntersection[2]) shortestIntersection = intersection;
+					if (intersection[2] < shortestIntersection[2]) {
+						shortestIntersection = intersection;
+						shortestIntersectionLine = [bound[b], bound[b + 1], bound[b + 2], bound[b + 3]];
+					}
 				}
 			});
 
 			if (shortestIntersection) {
 				x = shortestIntersection[0];
 				y = shortestIntersection[1];
+
+				if (!prevLightenBounds) {
+					prevLightenBounds = [x, y, ...shortestIntersectionLine];
+				} else if (
+					prevLightenBounds[2] != shortestIntersectionLine[0] ||
+					prevLightenBounds[3] != shortestIntersectionLine[1] ||
+					prevLightenBounds[4] != shortestIntersectionLine[2] ||
+					prevLightenBounds[5] != shortestIntersectionLine[3]
+				) {
+					prevLightenBounds = null;
+				} else {
+					this.lightenBounds.push([prevLightenBounds[0], prevLightenBounds[1], x, y, shortestIntersection[2]]);
+					prevLightenBounds[0] = x;
+					prevLightenBounds[1] = y;
+				}
+			} else {
+				prevLightenBounds = null;
 			}
 
 			this.rays[a].x = x;
