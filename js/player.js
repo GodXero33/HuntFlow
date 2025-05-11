@@ -1,3 +1,4 @@
+import Torch from "./torch.js";
 import {  getIntersectionOfTwoLines, Vector } from "./util.js";
 
 class PlayerControls {
@@ -20,7 +21,7 @@ class Player {
 
 		this.speed = 0.15;
 		this.steeringFact = 0.002;
-		this.visionRange = 900;
+		this.visionRange = 2000;
 
 		this.canvasDimensions = new Vector();
 		this.originalBounds = [];
@@ -30,6 +31,7 @@ class Player {
 		this.color = '#994476';
 
 		this.controls = new PlayerControls(this);
+		this.torch = new Torch(this);
 	}
 
 	updateMovement (deltaTime, bounds) {
@@ -148,6 +150,7 @@ class Player {
 
 	update (deltaTime, bounds) {
 		this.updateMovement(deltaTime, bounds);
+		this.torch.update(bounds);
 	}
 
 	draw(ctx) {
@@ -178,6 +181,8 @@ class Player {
 			ctx.stroke();
 			ctx.setLineDash([]);
 		}
+
+		this.torch.draw(ctx);
 	}
 
 	setPlayerData (data) {

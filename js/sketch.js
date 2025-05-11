@@ -131,9 +131,9 @@ function init () {
 
 function updateDebugModeVariables () {
 	if (window['UltraSnake2D_debug_mode'] == 1) {
-		worldMap.screenObjectsFilterOffset = 100;
+		worldMap.visibleObjectsFilterOffset = 100;
 	} else {
-		worldMap.screenObjectsFilterOffset = -200;
+		worldMap.visibleObjectsFilterOffset = -200;
 	}
 }
 
