@@ -4,7 +4,7 @@ export default class Torch {
 	constructor (player) {
 		this.player = player;
 		this.range = this.player.visionRange * 0.25;
-		this.spread = Math.PI / 3;
+		this.spread = Math.PI * 0.33;
 		this.dense = 100;
 		this.rays = Array.from({ length: this.dense }, () => new Vector());
 		this.polygon = [];

@@ -154,6 +154,8 @@ class Player {
 	}
 
 	draw(ctx) {
+		this.torch.draw(ctx);
+
 		const transform = ctx.getTransform();
 
 		ctx.fillStyle = '#347';
@@ -181,8 +183,6 @@ class Player {
 			ctx.stroke();
 			ctx.setLineDash([]);
 		}
-
-		this.torch.draw(ctx);
 	}
 
 	setPlayerData (data) {

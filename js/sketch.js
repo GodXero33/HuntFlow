@@ -20,9 +20,6 @@ let nextAnimationFrame = null;
 let pauseOnBlur = false;
 let isGameOver = false;
 
-const controlFps = 60;
-const frameDuration = 1000 / controlFps;
-let accumulator = 0;
 let prevTime = 0;
 let deltaTime = 0;
 let fpsUpdateCounter = 0;
@@ -68,18 +65,12 @@ function updateFPS () {
 
 function animate () {
 	const now = performance.now();
-	const elapsed = now - prevTime;
+	deltaTime = now - prevTime;
+
+	update(deltaTime);
+	draw();
+
 	prevTime = now;
-	accumulator += elapsed;
-
-	while (accumulator >= frameDuration) {
-		deltaTime = frameDuration;
-
-		update(deltaTime);
-		draw();
-
-		accumulator -= frameDuration;
-	}
 
 	if (window['UltraSnake2D_debug_mode'] !== 0) updateFPS();
 
