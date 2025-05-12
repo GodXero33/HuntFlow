@@ -9,6 +9,8 @@
 		<script>
 if (!navigator.userAgentData || navigator.userAgentData.platform !== 'Windows') {
 	alert('Sorry, this app is only available on Windows devices.');
+} else if (window.innerWidth < 240 || window.innerHeight < 240 || window.innerWidth / window.innerHeight < 1) {
+	alert('HuntFlow needs a minimum screen size of 240x240 pixels.\nWidth must be equal to or greater than height (square or landscape).\nPortrait screens are not supported. Please rotate or resize your window.');
 } else {
 	const script = document.createElement('script');
 
