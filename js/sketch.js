@@ -224,7 +224,7 @@ function loadLocalData () {
 	localStorage.setItem('HuntFlow-data', JSON.stringify(localData));
 }
 
-window.addEventListener('DOMContentLoaded', async () => {
+(async function () {
 	try {
 		loadLocalData();
 
@@ -236,4 +236,4 @@ window.addEventListener('DOMContentLoaded', async () => {
 	} catch (error) {
 		console.error('Failed to start game: ', error);
 	}
-});
+})();
