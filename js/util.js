@@ -187,6 +187,26 @@ class Vector {
 	}
 }
 
+function getBoundingRect (bounds) {
+	let minX = Infinity;
+	let minY = Infinity;
+	let maxX = -Infinity;
+	let maxY = -Infinity;
+
+	for (let a = 0; a < bounds.length; a += 2) {
+		const x = bounds[a];
+		const y = bounds[a + 1];
+
+		if (minX > x) minX = x;
+		if (minY > y) minY = y;
+
+		if (maxX < x) maxX = x;
+		if (maxY < y) maxY = y;
+	}
+
+	return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+}
+
 export {
 	getIntersectionOfTwoLines,
 	isPolygonsOverlapOrContain,
@@ -195,5 +215,6 @@ export {
 	inverseLerp,
 	angleDifference,
 	isTwoRectangleIntersecting,
+	getBoundingRect,
 	Vector
 };

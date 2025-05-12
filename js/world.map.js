@@ -1,6 +1,6 @@
 import DummyCreature from "./dummy.creature.js";
 import { loadMapResources } from "./map.loader.js";
-import { isPolygonsOverlapOrContain, isTwoRectangleIntersecting, Vector } from "./util.js";
+import { getBoundingRect, isPolygonsOverlapOrContain, isTwoRectangleIntersecting, Vector } from "./util.js";
 
 export default class WorldMap {
 	constructor (player) {
@@ -32,7 +32,7 @@ export default class WorldMap {
 		this.map = map;
 
 		map.objects.forEach(object => {
-			if (object.bounds !== undefined) object.boundingRect = WorldMap.getBoundingRect(object.bounds);
+			if (object.bounds !== undefined) object.boundingRect = getBoundingRect(object.bounds);
 		});
 	}
 
@@ -95,7 +95,7 @@ export default class WorldMap {
 		this.visibleObjects = this.map.objects.filter(object => object.boundingRect && isTwoRectangleIntersecting(object.boundingRect, this.rotatedCameraRect));
 
 		this.updatableDynamicObjects = this.dynamicObjects.filter(object => {
-			const boundingRect = WorldMap.getBoundingRect(object.bounds);
+			const boundingRect = getBoundingRect(object.bounds);
 			return isTwoRectangleIntersecting(boundingRect, this.rotatedUpdatableCameraRect);
 		});
 
@@ -165,26 +165,6 @@ export default class WorldMap {
 		if (window['UltraSnake2D_debug_mode'] === 1) this.drawDebug(ctx);
 
 		ctx.restore();
-	}
-
-	static getBoundingRect (bounds) {
-		let minX = Infinity;
-		let minY = Infinity;
-		let maxX = -Infinity;
-		let maxY = -Infinity;
-
-		for (let a = 0; a < bounds.length; a += 2) {
-			const x = bounds[a];
-			const y = bounds[a + 1];
-
-			if (minX > x) minX = x;
-			if (minY > y) minY = y;
-
-			if (maxX < x) maxX = x;
-			if (maxY < y) maxY = y;
-		}
-
-		return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
 	}
 
 	updateScaleFactor () {
