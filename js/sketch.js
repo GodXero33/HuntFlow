@@ -150,6 +150,10 @@ window.addEventListener('keyup', event => {
 		updateDebugModeVariables();
 	}
 
+	if (event.code === 'KeyT') {
+		player.isTorchOn = !player.isTorchOn;
+	}
+
 	if (event.code === 'KeyW') player.controls.forward = false;
 	if (event.code === 'KeyS') player.controls.backward = false;
 	if (event.code === 'KeyD') player.controls.right = false;

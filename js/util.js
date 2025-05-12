@@ -44,6 +44,45 @@ function getIntersectionOfTwoLines (x1, y1, x2, y2, x3, y3, x4, y4, returnAnyway
 	return null;
 }
 
+function isPointInsidePolygon (x, y, polygon) {
+	let inside = false;
+
+	for (let i = 0, j = polygon.length - 2; i < polygon.length; j = i, i += 2) {
+		const xi = polygon[i], yi = polygon[i + 1];
+		const xj = polygon[j], yj = polygon[j + 1];
+
+		const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+
+		if (intersect) inside = !inside;
+	}
+
+	return inside;
+}
+
+function isPolygonsOverlapOrContain (polygon1, polygon2) {
+	// Check for edge intersection
+	for (let i = 0; i < polygon1.length - 2; i += 2) {
+		const p1x1 = polygon1[i], p1y1 = polygon1[i + 1];
+		const p1x2 = polygon1[i + 2], p1y2 = polygon1[i + 3];
+
+		for (let j = 0; j < polygon2.length - 2; j += 2) {
+			const p2x1 = polygon2[j],     p2y1 = polygon2[j + 1];
+			const p2x2 = polygon2[j + 2], p2y2 = polygon2[j + 3];
+
+			if (getIntersectionOfTwoLines(p1x1, p1y1, p1x2, p1y2, p2x1, p2y1, p2x2, p2y2)) return true;
+		}
+	}
+
+	// Check if a point from polygon1 is inside polygon2
+	if (isPointInsidePolygon(polygon1[0], polygon1[1], polygon2)) return true;
+
+	// Check if a point from polygon2 is inside polygon1
+	if (isPointInsidePolygon(polygon2[0], polygon2[1], polygon1)) return true;
+
+	// No overlap or containment found
+	return false;
+}
+
 function angleDifference (a, b) {
 	let diff = a - b;
 
@@ -150,6 +189,8 @@ class Vector {
 
 export {
 	getIntersectionOfTwoLines,
+	isPolygonsOverlapOrContain,
+	isPointInsidePolygon,
 	lerp,
 	inverseLerp,
 	angleDifference,

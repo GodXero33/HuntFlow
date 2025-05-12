@@ -32,6 +32,8 @@ class Player {
 
 		this.controls = new PlayerControls(this);
 		this.torch = new Torch(this);
+
+		this.isTorchOn = true;
 	}
 
 	updateMovement (deltaTime, bounds) {
@@ -150,11 +152,12 @@ class Player {
 
 	update (deltaTime, bounds) {
 		this.updateMovement(deltaTime, bounds);
-		this.torch.update(bounds);
+
+		if (this.isTorchOn) this.torch.update(bounds);
 	}
 
 	draw(ctx) {
-		this.torch.draw(ctx);
+		if (this.isTorchOn) this.torch.draw(ctx);
 
 		const transform = ctx.getTransform();
 

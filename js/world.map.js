@@ -1,5 +1,6 @@
+import DummyCreature from "./dummy.creature.js";
 import { loadMapResources } from "./map.loader.js";
-import { isTwoRectangleIntersecting, Vector } from "./util.js";
+import { isPolygonsOverlapOrContain, isTwoRectangleIntersecting, Vector } from "./util.js";
 
 export default class WorldMap {
 	constructor (player) {
@@ -9,9 +10,11 @@ export default class WorldMap {
 
 		this.visibleObjects = [];
 		this.visibleObjectsFilterOffset = 200;
+		this.updateObjectsFilterOffset = 200;
 
-		this.updatableObjects = [];
-		this.updatableObjectsFilterOffset = -this.player.visionRange;
+		this.dynamicObjects = [];
+		this.updatableDynamicObjects = [];
+		this.visibleDynamicObjects = [];
 
 		this.cameraRect = { x: 0, y: 0, w: 0, h: 0 };
 		this.rotatedCameraRect = { x: 0, y: 0, w: 0, h: 0 };
@@ -72,13 +75,12 @@ export default class WorldMap {
 		const scaledCanvasW = this.canvasDimensions.x / this.scaleFactor;
 		const scaledCanvasH = this.canvasDimensions.y / this.scaleFactor;
 		const scaledOffsetForVisible = this.visibleObjectsFilterOffset / this.scaleFactor;
+		const scaledOffsetForUpdate = this.updateObjectsFilterOffset / this.scaleFactor;
 
 		this.cameraRect.x = this.player.position.x - scaledCanvasW * 0.5 + scaledOffsetForVisible * 0.5;
 		this.cameraRect.y = this.player.position.y - scaledCanvasH * 0.5 + scaledOffsetForVisible * 0.5;
 		this.cameraRect.w = scaledCanvasW - scaledOffsetForVisible;
 		this.cameraRect.h = scaledCanvasH - scaledOffsetForVisible;
-
-		const scaledOffsetForUpdate = this.updatableObjectsFilterOffset / this.scaleFactor;
 
 		this.updatableCameraRect.x = this.player.position.x - scaledCanvasW * 0.5 + scaledOffsetForUpdate * 0.5;
 		this.updatableCameraRect.y = this.player.position.y - scaledCanvasH * 0.5 + scaledOffsetForUpdate * 0.5;
@@ -89,9 +91,20 @@ export default class WorldMap {
 		this.rotatedUpdatableCameraRect = this.getRotatedCameraRect(this.updatableCameraRect, -this.player.rotation);
 
 		this.visibleObjects = this.map.objects.filter(object => object.boundingRect && isTwoRectangleIntersecting(object.boundingRect, this.rotatedCameraRect));
-		this.updatableObjects = this.map.objects.filter(object => object.boundingRect && isTwoRectangleIntersecting(object.boundingRect, this.rotatedUpdatableCameraRect));
 
-		this.player.update(deltaTime, this.updatableObjects.map(object => object.bounds));
+		this.updatableDynamicObjects = this.dynamicObjects.filter(object => {
+			const boundingRect = WorldMap.getBoundingRect(object.bounds);
+			return isTwoRectangleIntersecting(boundingRect, this.rotatedUpdatableCameraRect);
+		});
+
+		if (this.player.isTorchOn) {
+			this.visibleDynamicObjects = this.updatableDynamicObjects.filter(object => isPolygonsOverlapOrContain(object.bounds, this.player.torch.polygon));
+		} else {
+			this.visibleDynamicObjects = [];
+		}
+
+		this.player.update(deltaTime, this.visibleObjects.map(object => object.bounds));
+		this.updatableDynamicObjects.forEach(object => object.update(deltaTime));
 	}
 
 	drawDebug (ctx) {
@@ -99,7 +112,7 @@ export default class WorldMap {
 		ctx.strokeStyle = '#f00';
 		ctx.setLineDash([5, 10]);
 
-		this.visibleObjects.forEach(object => {
+		this.visibleDynamicObjects.forEach(object => {
 			if (!object.boundingRect) return;
 
 			ctx.strokeRect(object.boundingRect.x, object.boundingRect.y, object.boundingRect.w, object.boundingRect.h);
@@ -118,6 +131,8 @@ export default class WorldMap {
 
 		ctx.strokeStyle = '#00f';
 		ctx.strokeRect(this.rotatedCameraRect.x, this.rotatedCameraRect.y, this.rotatedCameraRect.w, this.rotatedCameraRect.h);
+
+		this.dynamicObjects.forEach(object => object.drawDebug(ctx));
 	}
 
 	draw (ctx) {
@@ -142,6 +157,8 @@ export default class WorldMap {
 
 			ctx.stroke();
 		});
+
+		this.visibleDynamicObjects.forEach(object => object.draw(ctx));
 
 		if (window['UltraSnake2D_debug_mode'] === 1) this.drawDebug(ctx);
 
