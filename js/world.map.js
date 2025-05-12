@@ -23,6 +23,8 @@ export default class WorldMap {
 		this.rotatedUpdatableCameraRect = { x: 0, y: 0, w: 0, h: 0 };
 
 		this.scaleFactor = 1;
+
+		this.dynamicObjects.push(new DummyCreature(300, 300));
 	}
 
 	async setMap (map) {
@@ -143,7 +145,7 @@ export default class WorldMap {
 		ctx.translate(-this.player.position.x, -this.player.position.y);
 		this.player.draw(ctx);
 
-		ctx.strokeStyle = '#ffffff22';
+		ctx.strokeStyle = '#55555566';
 		ctx.lineWidth = 2;
 
 		this.visibleObjects.forEach(object => {
