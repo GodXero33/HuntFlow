@@ -2,7 +2,9 @@ import DummyCreature from "./dummy.creature.js";
 import { loadMapResources } from "./map.loader.js";
 import { getBoundingRect, isPolygonsOverlapOrContain, isTwoRectangleIntersecting, Vector } from "./util.js";
 
-export default class WorldMap {
+let debugMode = 0;
+
+class WorldMap {
 	constructor (player) {
 		this.player = player;
 		this.map = null;
@@ -24,7 +26,7 @@ export default class WorldMap {
 
 		this.scaleFactor = 1;
 
-		this.dynamicObjects.push(new DummyCreature(300, 300));
+		this.dynamicObjects.push(new DummyCreature(0, 0));
 	}
 
 	async setMap (map) {
@@ -135,6 +137,7 @@ export default class WorldMap {
 		ctx.strokeRect(this.rotatedCameraRect.x, this.rotatedCameraRect.y, this.rotatedCameraRect.w, this.rotatedCameraRect.h);
 
 		this.dynamicObjects.forEach(object => object.drawDebug(ctx));
+		this.player.drawDebug(ctx);
 	}
 
 	draw (ctx) {
@@ -143,7 +146,6 @@ export default class WorldMap {
 		ctx.rotate(-this.player.rotation);
 		ctx.scale(this.scaleFactor, this.scaleFactor);
 		ctx.translate(-this.player.position.x, -this.player.position.y);
-		this.player.draw(ctx);
 
 		ctx.strokeStyle = '#55555566';
 		ctx.lineWidth = 2;
@@ -161,8 +163,9 @@ export default class WorldMap {
 		});
 
 		this.visibleDynamicObjects.forEach(object => object.draw(ctx));
+		this.player.draw(ctx);
 
-		if (window['UltraSnake2D_debug_mode'] === 1) this.drawDebug(ctx);
+		if (debugMode === 1) this.drawDebug(ctx);
 
 		ctx.restore();
 	}
@@ -171,3 +174,12 @@ export default class WorldMap {
 		this.scaleFactor = this.canvasDimensions.y * 2 / this.player.visionRange;
 	}
 }
+
+function notifyDebugMode (mode) {
+	debugMode = mode;
+}
+
+export {
+	notifyDebugMode,
+	WorldMap
+};

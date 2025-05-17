@@ -4,8 +4,8 @@ export default class Torch {
 	constructor (player) {
 		this.player = player;
 		this.range = this.player.visionRange * 0.25;
-		this.spread = Math.PI * 0.33;
-		this.dense = 100;
+		this.spread = Math.PI * 2;
+		this.dense = 500;
 		this.rays = Array.from({ length: this.dense }, () => new Vector());
 		this.polygon = [];
 		this.lightenBounds = [];
@@ -14,7 +14,7 @@ export default class Torch {
 	draw (ctx) {
 		const gradient = ctx.createRadialGradient(this.player.position.x, this.player.position.y, 0, this.player.position.x, this.player.position.y, this.range);
 
-		gradient.addColorStop(0, '#ffffff');
+		gradient.addColorStop(0, '#000000');
 		gradient.addColorStop(1, 'transparent');
 		ctx.fillStyle = gradient;
 
@@ -27,6 +27,16 @@ export default class Torch {
 				ctx.lineTo(this.polygon[a], this.polygon[a + 1]);
 			}
 		}
+
+		ctx.globalCompositeOperation = "destination-in";
+
+		ctx.fill();
+
+		ctx.globalCompositeOperation = "source-over";
+
+		gradient.addColorStop(0, '#ffffff66');
+		gradient.addColorStop(1, 'transparent');
+		ctx.fillStyle = gradient;
 
 		ctx.fill();
 

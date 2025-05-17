@@ -156,6 +156,24 @@ class Player {
 		if (this.isTorchOn) this.torch.update(bounds);
 	}
 
+	drawDebug (ctx) {
+		ctx.strokeStyle = '#f00';
+		ctx.setLineDash([5, 10]);
+
+		ctx.beginPath();
+
+		for (let a = 0; a < this.bounds.length; a += 2) {
+			if (a == 0) {
+				ctx.moveTo(this.bounds[a], this.bounds[a + 1]);
+			} else {
+				ctx.lineTo(this.bounds[a], this.bounds[a + 1]);
+			}
+		}
+
+		ctx.stroke();
+		ctx.setLineDash([]);
+	}
+
 	draw(ctx) {
 		if (this.isTorchOn) this.torch.draw(ctx);
 
@@ -168,24 +186,6 @@ class Player {
 		ctx.fillRect(-this.drawSize * 0.5, -this.drawSize * 0.5, this.drawSize, this.drawSize);
 		
 		ctx.setTransform(transform);
-
-		if (window['UltraSnake2D_debug_mode'] === 1) {
-			ctx.strokeStyle = '#f00';
-			ctx.setLineDash([5, 10]);
-
-			ctx.beginPath();
-
-			for (let a = 0; a < this.bounds.length; a += 2) {
-				if (a == 0) {
-					ctx.moveTo(this.bounds[a], this.bounds[a + 1]);
-				} else {
-					ctx.lineTo(this.bounds[a], this.bounds[a + 1]);
-				}
-			}
-
-			ctx.stroke();
-			ctx.setLineDash([]);
-		}
 	}
 
 	setPlayerData (data) {

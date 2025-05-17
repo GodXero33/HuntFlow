@@ -1,16 +1,16 @@
 import { loadMap } from "./map.loader.js";
 import { Player } from "./player.js";
-import WorldMap from "./world.map.js";
+import { WorldMap, notifyDebugMode as notifyDebugModeForWorldMap } from "./world.map.js";
 
-window['UltraSnake2D_debug_mode'] = 1; // 0 - normal(user view) | 1 - debugging type 1 | 2 - debugging type 2
-window['UltraSnake2D_debug_modes_count'] = 3;
+var debugMode = 1; // 0 - normal(user view) | 1 - debugging type 1 | 2 - debugging type 2
+var debugModeCount = 3;
 
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
 const player = new Player();
 const worldMap = new WorldMap(player);
 
-console.log(worldMap, navigator.userAgentData);
+console.log(worldMap);
 
 let width, height;
 
@@ -33,7 +33,7 @@ function draw () {
 
 	worldMap.draw(ctx);
 
-	if (window['UltraSnake2D_debug_mode'] !== 0) {
+	if (debugMode !== 0) {
 		ctx.font = 'bold 20px Verdana';
 		ctx.textBaseline = 'middle';
 
@@ -72,7 +72,7 @@ function animate () {
 
 	prevTime = now;
 
-	if (window['UltraSnake2D_debug_mode'] !== 0) updateFPS();
+	if (debugMode !== 0) updateFPS();
 
 	nextAnimationFrame = requestAnimationFrame(animate);
 }
@@ -121,7 +121,7 @@ function init () {
 }
 
 function updateDebugModeVariables () {
-	if (window['UltraSnake2D_debug_mode'] == 1) {
+	if (debugMode == 1) {
 		worldMap.visibleObjectsFilterOffset = 100;
 	} else {
 		worldMap.visibleObjectsFilterOffset = -200;
@@ -146,7 +146,8 @@ window.addEventListener('keyup', event => {
 	}
 
 	if (event.code === 'KeyF') {
-		window['UltraSnake2D_debug_mode'] = (window['UltraSnake2D_debug_mode'] + 1) % window['UltraSnake2D_debug_modes_count'];
+		debugMode = (debugMode + 1) % debugModeCount;
+		notifyDebugModeForWorldMap(debugMode);
 		updateDebugModeVariables();
 	}
 
