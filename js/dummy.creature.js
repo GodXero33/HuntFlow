@@ -7,7 +7,7 @@ export default class DummyCreature {
 		this.originalBounds = [-18, -18, 18, -18, 18, 18, -18, 18, -18, -18];
 		this.bounds = Array.from(this.originalBounds);
 		this.rotation = 0;
-		this.t = 0;
+		this.t = -Math.PI * 0.5 + 0.5;
 	}
 
 	drawDebug (ctx) {
@@ -28,7 +28,7 @@ export default class DummyCreature {
 
 		nextPositionX = Math.cos(this.t) * 200;
 		nextPositionY = Math.sin(this.t) * 200;
-		this.t += 0.001 * deltaTime;
+		// this.t += 0.001 * deltaTime;
 
 		const cos = Math.cos(this.rotation);
 		const sin = Math.sin(this.rotation);
