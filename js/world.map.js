@@ -1,6 +1,6 @@
 import DummyCreature from "./dummy.creature.js";
 import { loadMapResources } from "./map.loader.js";
-import { getBoundingRect, isPolygonsOverlapOrContain, isTwoRectangleIntersecting, Vector } from "./util.js";
+import { distanceSQRT, getBoundingRect, isPolygonsOverlapOrContain, isTwoRectangleIntersecting, Vector } from "./util.js";
 
 let debugMode = 0;
 
@@ -116,10 +116,16 @@ class WorldMap {
 		ctx.strokeStyle = '#f00';
 		ctx.setLineDash([5, 10]);
 
-		this.visibleDynamicObjects.forEach(object => {
+		this.visibleObjects.forEach(object => {
 			if (!object.boundingRect) return;
 
 			ctx.strokeRect(object.boundingRect.x, object.boundingRect.y, object.boundingRect.w, object.boundingRect.h);
+		});
+
+		this.visibleDynamicObjects.forEach(object => {
+			if (!object.bounds) return;
+
+			object.drawDebug(ctx);
 		});
 
 		ctx.setLineDash([]);
@@ -136,7 +142,6 @@ class WorldMap {
 		ctx.strokeStyle = '#00f';
 		ctx.strokeRect(this.rotatedCameraRect.x, this.rotatedCameraRect.y, this.rotatedCameraRect.w, this.rotatedCameraRect.h);
 
-		this.dynamicObjects.forEach(object => object.drawDebug(ctx));
 		this.player.drawDebug(ctx);
 	}
 
@@ -150,19 +155,22 @@ class WorldMap {
 		ctx.strokeStyle = '#55555566';
 		ctx.lineWidth = 2;
 
-		this.visibleObjects.forEach(object => {
-			const bound = object.bounds;
+		if (this.player.isTorchOn) {
+			this.visibleObjects.forEach(object => {
+				const bound = object.bounds;
 
-			ctx.beginPath();
-			ctx.moveTo(bound[0], bound[1]);
+				ctx.beginPath();
+				ctx.moveTo(bound[0], bound[1]);
 
-			for (let a = 2; a < bound.length; a += 2)
-				ctx.lineTo(bound[a], bound[a + 1]);
+				for (let a = 2; a < bound.length; a += 2)
+					ctx.lineTo(bound[a], bound[a + 1]);
 
-			ctx.stroke();
-		});
+				ctx.stroke();
+			});
 
-		this.visibleDynamicObjects.forEach(object => object.draw(ctx));
+			this.visibleDynamicObjects.forEach(object => object.draw(ctx));
+		}
+
 		this.player.draw(ctx);
 
 		if (debugMode === 1) this.drawDebug(ctx);

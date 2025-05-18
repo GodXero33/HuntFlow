@@ -4,17 +4,19 @@ export default class Torch {
 	constructor (player) {
 		this.player = player;
 		this.range = this.player.visionRange * 0.25;
-		this.spread = Math.PI * 2;
+		this.spread = Math.PI * 0.5;
 		this.dense = 500;
 		this.rays = Array.from({ length: this.dense }, () => new Vector());
 		this.polygon = [];
 		this.lightenBounds = [];
+		this.color = '#ffffff';
 	}
 
 	draw (ctx) {
 		const gradient = ctx.createRadialGradient(this.player.position.x, this.player.position.y, 0, this.player.position.x, this.player.position.y, this.range);
 
-		gradient.addColorStop(0, '#000000');
+		gradient.addColorStop(0, this.color + '77');
+		gradient.addColorStop(0.2, this.color + '33');
 		gradient.addColorStop(1, 'transparent');
 		ctx.fillStyle = gradient;
 
@@ -27,16 +29,6 @@ export default class Torch {
 				ctx.lineTo(this.polygon[a], this.polygon[a + 1]);
 			}
 		}
-
-		ctx.globalCompositeOperation = "destination-in";
-
-		ctx.fill();
-
-		ctx.globalCompositeOperation = "source-over";
-
-		gradient.addColorStop(0, '#ffffff66');
-		gradient.addColorStop(1, 'transparent');
-		ctx.fillStyle = gradient;
 
 		ctx.fill();
 
@@ -57,8 +49,8 @@ export default class Torch {
 	update (bounds) {
 		const playerX = this.player.position.x;
 		const playerY = this.player.position.y;
-		const deltaAngle = this.spread / (this.dense - 1);
-		const startAngle = this.player.rotation - this.spread / 2 - Math.PI / 2;
+		const deltaAngle = Math.PI * 2 / (this.dense - 1);
+		const startAngle = this.player.rotation - Math.PI * 1.5;
 
 		this.polygon.length = 0;
 		this.lightenBounds.length = 0;
@@ -68,8 +60,14 @@ export default class Torch {
 		let prevLightenBounds = null;
 
 		for (let a = 0; a < this.dense; a++) {
-			let x = Math.cos(startAngle + a * deltaAngle) * this.range + playerX;
-			let y = Math.sin(startAngle + a * deltaAngle) * this.range + playerY;
+			const relativeAngle = a * deltaAngle;
+			const angle = startAngle + relativeAngle;
+			let range = this.range;
+
+			if (relativeAngle < Math.PI - this.spread * 0.5 || relativeAngle > Math.PI + this.spread * 0.5) range = this.player.nearVisibleLength;
+
+			let x = Math.cos(angle) * range + playerX;
+			let y = Math.sin(angle) * range + playerY;
 
 			let shortestIntersection = null;
 			let shortestIntersectionLine = null;
