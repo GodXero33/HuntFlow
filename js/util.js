@@ -207,6 +207,14 @@ function getBoundingRect (bounds) {
 	return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
 }
 
+function distanceSQRT (x1, y1, x2, y2) {
+	return (x1 - x2) ** 2 + (y1 - y2) ** 2;
+}
+
+function distance (x1, y1, x2, y2) {
+	return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+}
+
 export {
 	getIntersectionOfTwoLines,
 	isPolygonsOverlapOrContain,
@@ -216,5 +224,7 @@ export {
 	angleDifference,
 	isTwoRectangleIntersecting,
 	getBoundingRect,
+	distanceSQRT,
+	distance,
 	Vector
 };

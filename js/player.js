@@ -34,6 +34,7 @@ class Player {
 		this.torch = new Torch(this);
 
 		this.isTorchOn = true;
+		this.nearVisibleLength = 100;
 	}
 
 	updateMovement (deltaTime, bounds) {
@@ -178,13 +179,13 @@ class Player {
 		if (this.isTorchOn) this.torch.draw(ctx);
 
 		const transform = ctx.getTransform();
-
 		ctx.fillStyle = '#347';
 
 		ctx.translate(this.position.x, this.position.y);
 		ctx.rotate(this.rotation);
+
 		ctx.fillRect(-this.drawSize * 0.5, -this.drawSize * 0.5, this.drawSize, this.drawSize);
-		
+
 		ctx.setTransform(transform);
 	}
 

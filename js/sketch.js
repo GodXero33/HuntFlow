@@ -2,7 +2,7 @@ import { loadMap } from "./map.loader.js";
 import { Player } from "./player.js";
 import { WorldMap, notifyDebugMode as notifyDebugModeForWorldMap } from "./world.map.js";
 
-var debugMode = 1; // 0 - normal(user view) | 1 - debugging type 1 | 2 - debugging type 2
+var debugMode = 0; // 0 - normal(user view) | 1 - debugging type 1 | 2 - debugging type 2
 var debugModeCount = 3;
 
 const canvas = document.getElementById('game-canvas');
@@ -118,6 +118,7 @@ function init () {
 
 	resize();
 	play();
+	notifyDebugModeForWorldMap(debugMode);
 }
 
 function updateDebugModeVariables () {
